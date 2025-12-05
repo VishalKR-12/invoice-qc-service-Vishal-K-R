@@ -1041,5 +1041,6 @@ For issues or questions, please refer to the documentation files:
 ---
 
 **Built with AI assistance (Claude by Anthropic)**
-#   i n v o i c e - q c - s e r v i c e - V i s h a l - K - R  
+#   i n v o i c e - q c - s e r v i c e - V i s h a l - K - R 
+ 
  
