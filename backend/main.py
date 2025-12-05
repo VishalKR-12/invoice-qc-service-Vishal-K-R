@@ -5,15 +5,19 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import asyncio
+import logging
 from typing import Optional, List, Dict
 from datetime import datetime
-from models import ValidationResult, ProcessResponse, InvoiceSchema, GoogleVerificationResult
+from models import ValidationResult, ProcessResponse, InvoiceSchema, GoogleVerificationResult, MergedExtractionResponse
 from pdf_extractor import PDFExtractor
 from validator import InvoiceValidator
 from google_verifier import GoogleVerifier
+from extraction_merger import ExtractionMerger
 from database import Database
 from pydantic import BaseModel
 import mimetypes
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Invoicely API", description="Invoice Extraction & Quality Control Service", version="1.0.0")
 
@@ -29,6 +33,7 @@ db = Database()
 extractor = PDFExtractor()
 validator = InvoiceValidator()
 google_verifier = GoogleVerifier()
+merger = ExtractionMerger()
 
 @app.get("/")
 async def root():
@@ -42,6 +47,79 @@ async def health_check():
         return {"status": "healthy", "service": "Invoicely API", "database": "connected"}
     except Exception as e:
         return {"status": "unhealthy", "service": "Invoicely API", "database": "disconnected", "error": str(e)}
+
+@app.post("/api/extract-dual-source")
+async def extract_dual_source(file: UploadFile = File(...)):
+    """
+    Advanced dual-source extraction with intelligent merging.
+    
+    Process:
+    1. Extract from PDF using local pdf_extractor.py
+    2. Extract using Google Vision API
+    3. Compare field-by-field
+    4. Select best value for each field based on reliability
+    5. Return merged result with debugging info
+    
+    Returns:
+    {
+        "pdf_data": {...},           # Local PDF extraction
+        "google_data": {...},        # Google Vision extraction
+        "final_output": {...},       # Best merged values
+        "field_comparisons": [...],  # Detailed comparison per field
+        "notes": [...],              # Processing notes
+        "mismatches": [...],         # Fields with differences
+        "quality_score": 87.5,       # Overall quality (0-100)
+        "recommendation": "approve"  # "approve", "review", or "reject"
+    }
+    """
+    
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+    
+    filename_lower = file.filename.lower()
+    if not filename_lower.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported for dual-source extraction")
+    
+    content = await file.read()
+    file_size = len(content)
+    
+    if file_size > 35 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 35MB limit")
+    
+    if file_size == 0:
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    temp_file_path = None
+    
+    try:
+        # Write to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        # Perform dual-source extraction and merge
+        merge_result = merger.extract_and_merge(temp_file_path)
+        
+        # Convert to JSON response
+        response_data = merge_result.to_dict()
+        
+        return {
+            "success": True,
+            "merged_extraction": response_data,
+            "message": "Dual-source extraction completed successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Dual-source extraction failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in dual-source extraction: {str(e)}")
+        
+    finally:
+        # Cleanup temp file
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
 
 def get_file_type(filename: str) -> str:
     """Determine file type from filename extension"""

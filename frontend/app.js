@@ -11,6 +11,49 @@ let renderTask = null; // Current PDF render task
 let batchResultsData = null; // Store batch processing results
 let isViewingFromBatch = false; // Track if viewing result from batch processing
 
+// DUPLICATE PREVENTION: Upload state management
+let isUploading = false;  // Flag to prevent duplicate uploads
+let lastUploadedFileName = null;  // Track last uploaded file
+let lastUploadTimestamp = 0;  // Timestamp of last upload
+const UPLOAD_COOLDOWN_MS = 1000;  // Minimum time between uploads (1 second)
+
+/**
+ * Check if upload should be prevented due to duplicate
+ * @returns {boolean} true if upload is allowed, false if duplicate
+ */
+function canProceedWithUpload(fileName) {
+    // Already uploading
+    if (isUploading) {
+        console.warn('Upload already in progress. Ignoring duplicate request.');
+        return false;
+    }
+    
+    // Same file uploaded too recently
+    if (fileName === lastUploadedFileName && 
+        Date.now() - lastUploadTimestamp < UPLOAD_COOLDOWN_MS) {
+        console.warn('Duplicate file upload attempt within cooldown period. Ignoring.');
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Mark upload as started
+ */
+function markUploadStarted(fileName) {
+    isUploading = true;
+    lastUploadedFileName = fileName;
+}
+
+/**
+ * Mark upload as finished
+ */
+function markUploadFinished() {
+    isUploading = false;
+    lastUploadTimestamp = Date.now();
+}
+
 // Test backend connection on load
 async function testBackendConnection() {
     try {
@@ -273,11 +316,19 @@ function initializeUpload() {
                 handleBatchUpload(files);
             }
         }
+        // DUPLICATE PREVENTION: Clear file input after selection
+        e.target.value = '';
     });
 }
 
 async function handleFileUpload(file) {
     const fileName = file.name.toLowerCase();
+    
+    // DUPLICATE PREVENTION: Check if this upload should be blocked
+    if (!canProceedWithUpload(fileName)) {
+        alert('File is already being uploaded. Please wait.');
+        return;
+    }
     
     if (!fileName.endsWith('.pdf')) {
         alert('Only PDF files are supported.');
@@ -288,6 +339,9 @@ async function handleFileUpload(file) {
         alert('File size exceeds 35MB limit');
         return;
     }
+
+    // DUPLICATE PREVENTION: Mark upload as started
+    markUploadStarted(fileName);
 
     const processingIndicator = document.getElementById('processing-indicator');
     if (processingIndicator) {
@@ -338,9 +392,15 @@ async function handleFileUpload(file) {
                 processingIndicator.style.display = 'none';
             }
         }
+        
+        // DUPLICATE PREVENTION: Mark upload as finished
+        markUploadFinished();
 
     } catch (error) {
         console.error('Error uploading file:', error);
+        
+        // DUPLICATE PREVENTION: Mark upload as finished even on error
+        markUploadFinished();
         
         // Show detailed error message
         let errorMessage = 'Error processing invoice. ';

@@ -57,8 +57,34 @@ class ValidationResult(BaseModel):
     extracted_data: Optional[InvoiceSchema] = None
     google_verification: Optional[GoogleVerificationResult] = None
 
+class FieldComparisonModel(BaseModel):
+    """Field comparison from extraction merger"""
+    field_name: str
+    pdf_value: Optional[Any] = None
+    google_value: Optional[Any] = None
+    selected_value: Optional[Any] = None
+    selection_reason: str
+    confidence_score: float
+    is_mismatch: bool
+    recommendation: Optional[str] = None
+
+
+class MergedExtractionResponse(BaseModel):
+    """Response from dual-source extraction merger"""
+    pdf_data: Dict[str, Any]
+    google_data: Dict[str, Any]
+    final_output: Dict[str, Any]
+    field_comparisons: List[FieldComparisonModel] = []
+    notes: List[str] = []
+    mismatches: List[str] = []
+    merge_timestamp: str
+    quality_score: float
+    recommendation: str  # "approve", "review", "reject"
+
+
 class ProcessResponse(BaseModel):
     success: bool
     invoice_id: Optional[str] = None
     validation_result: Optional[ValidationResult] = None
+    merged_extraction: Optional[MergedExtractionResponse] = None
     message: str
