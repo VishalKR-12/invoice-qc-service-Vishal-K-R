@@ -5,10 +5,12 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import asyncio
-from typing import Optional, List
-from models import ValidationResult, ProcessResponse, InvoiceSchema
+from typing import Optional, List, Dict
+from datetime import datetime
+from models import ValidationResult, ProcessResponse, InvoiceSchema, GoogleVerificationResult
 from pdf_extractor import PDFExtractor
 from validator import InvoiceValidator
+from google_verifier import GoogleVerifier
 from database import Database
 from pydantic import BaseModel
 import mimetypes
@@ -26,6 +28,7 @@ app.add_middleware(
 db = Database()
 extractor = PDFExtractor()
 validator = InvoiceValidator()
+google_verifier = GoogleVerifier()
 
 @app.get("/")
 async def root():
@@ -136,13 +139,13 @@ async def upload_and_process(file: UploadFile = File(...)):
 
         # Try to save to database
         try:
-            invoice_data_dict = extracted_data.dict() if extracted_data else {}
+            invoice_data_dict = extracted_data.model_dump() if extracted_data else {}
             invoice_data_dict["file_name"] = file.filename
             invoice_data_dict["file_type"] = file_type
             
             invoice_id = db.save_invoice(
                 invoice_data_dict,
-                validation_result.dict(),
+                validation_result.model_dump(),
                 file_id=file_id
             )
             validation_result.invoice_id = invoice_id
@@ -176,6 +179,145 @@ async def validate_invoice(invoice: InvoiceSchema):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error validating invoice: {str(e)}")
 
+@app.post("/api/verify-google")
+async def verify_invoice_with_google(invoice: InvoiceSchema):
+    """
+    Verify extracted invoice data using Google APIs.
+    
+    Performs:
+    - Vendor/buyer name validation
+    - Invoice number format checking
+    - Date standardization
+    - Monetary field verification
+    - Line item calculation validation
+    - Auto-correction with confidence scoring
+    
+    Returns:
+    - Original extracted data
+    - Corrected data
+    - List of corrections with confidence levels
+    - Status (Verified, Review Needed, High Confidence)
+    - Source citations
+    """
+    try:
+        verification_result = google_verifier.verify_invoice(invoice)
+        return verification_result.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error verifying invoice: {str(e)}")
+
+@app.post("/api/verify-and-validate")
+async def verify_and_validate(invoice: InvoiceSchema):
+    """
+    Complete invoice processing pipeline:
+    1. Extract standard validation (completeness, format, business logic)
+    2. Google API verification (auto-correction, confidence scoring)
+    3. Combined results with recommendations
+    """
+    try:
+        # Standard validation
+        validation_result = validator.validate(invoice)
+        
+        # Google API verification
+        verification_result = google_verifier.verify_invoice(invoice)
+        
+        # Combine results
+        combined_response = {
+            "invoice_number": invoice.invoice_number,
+            "standard_validation": validation_result.dict(),
+            "google_verification": verification_result.to_dict(),
+            "recommendations": _generate_recommendations(validation_result, verification_result),
+            "processed_at": datetime.now().isoformat()
+        }
+        
+        return combined_response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in verification pipeline: {str(e)}")
+
+@app.post("/api/verify-batch")
+async def verify_batch(invoices: List[InvoiceSchema]):
+    """
+    Verify multiple invoices with Google APIs.
+    Returns aggregated results and per-invoice corrections.
+    """
+    try:
+        batch_results = []
+        statistics = {
+            "total_invoices": len(invoices),
+            "verified": 0,
+            "review_needed": 0,
+            "high_confidence": 0,
+            "low_confidence": 0,
+            "total_corrections": 0,
+            "average_confidence": 0.0
+        }
+        
+        confidence_scores = []
+        
+        for invoice in invoices:
+            verification_result = google_verifier.verify_invoice(invoice)
+            result_dict = verification_result.to_dict()
+            batch_results.append(result_dict)
+            
+            # Update statistics
+            if verification_result.status == "Verified":
+                statistics["verified"] += 1
+            elif verification_result.status == "Review Needed":
+                statistics["review_needed"] += 1
+            elif verification_result.status == "High Confidence":
+                statistics["high_confidence"] += 1
+            else:
+                statistics["low_confidence"] += 1
+            
+            statistics["total_corrections"] += len(verification_result.corrections)
+            confidence_scores.append(verification_result.overall_confidence)
+        
+        if confidence_scores:
+            statistics["average_confidence"] = sum(confidence_scores) / len(confidence_scores)
+        
+        return {
+            "statistics": statistics,
+            "results": batch_results,
+            "processed_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error verifying batch: {str(e)}")
+
+def _generate_recommendations(validation_result, verification_result) -> Dict:
+    """Generate recommendations based on validation and verification results"""
+    recommendations = {
+        "approval_ready": False,
+        "requires_review": False,
+        "required_actions": [],
+        "confidence_level": "Low"
+    }
+    
+    # Check validation errors
+    if validation_result.errors:
+        recommendations["requires_review"] = True
+        recommendations["required_actions"].extend(validation_result.errors)
+    
+    # Check verification status
+    if verification_result.status == "Review Needed":
+        recommendations["requires_review"] = True
+        for correction in verification_result.corrections:
+            if correction.requires_review:
+                recommendations["required_actions"].append(
+                    f"Review correction for {correction.field_name}: {correction.original_value} → {correction.corrected_value}"
+                )
+    
+    # Determine confidence level
+    if verification_result.overall_confidence >= 90 and not recommendations["requires_review"]:
+        recommendations["approval_ready"] = True
+        recommendations["confidence_level"] = "Very High"
+    elif verification_result.overall_confidence >= 80:
+        recommendations["confidence_level"] = "High"
+    elif verification_result.overall_confidence >= 70:
+        recommendations["confidence_level"] = "Medium"
+    else:
+        recommendations["confidence_level"] = "Low"
+    
+    return recommendations
+
 @app.post("/validate-json")
 async def validate_json(invoices: List[InvoiceSchema]):
     """
@@ -188,7 +330,7 @@ async def validate_json(invoices: List[InvoiceSchema]):
         
         for invoice in invoices:
             result = validator.validate(invoice)
-            result_dict = result.dict()
+            result_dict = result.model_dump()
             validation_results.append(result_dict)
             
             # Count errors for summary
