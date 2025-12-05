@@ -1,4 +1,4 @@
-const API_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
+const API_BASE_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
 
 let currentInvoiceData = null;
 let currentPdfFile = null; // Store uploaded PDF file for preview
