@@ -14,27 +14,42 @@ import os
 class Database:
     def __init__(self):
         try:
-            self.client: MongoClient = MongoClient(
-                MONGODB_URL,
-                tls=True,
-                tlsAllowInvalidCertificates=False,
-                tlsVersion=ssl.PROTOCOL_TLS_CLIENT,  # Ensures TLS 1.2+
-                serverSelectionTimeoutMS=10000       # 10 seconds
-            )
-
+            # Detect if using MongoDB Atlas (cloud) or local MongoDB
+            is_atlas = "mongodb+srv://" in MONGODB_URL
+            
+            # Configure TLS based on connection type
+            client_options = {
+                "serverSelectionTimeoutMS": 10000,  # 10 seconds
+            }
+            
+            if is_atlas:
+                # MongoDB Atlas requires TLS (automatically uses TLS 1.2+)
+                client_options.update({
+                    "tls": True,
+                    "tlsAllowInvalidCertificates": False,
+                })
+            else:
+                # Local MongoDB typically doesn't use TLS unless explicitly configured
+                client_options.update({
+                    "tls": False,
+                })
+            
+            self.client = MongoClient(MONGODB_URL, **client_options)
+            
             # Test the connection
             self.client.server_info()
             self.db = self.client[MONGODB_DATABASE_NAME]
             self.collection: Collection = self.db["invoices"]
-            self.fs = GridFS(self.db, collection="files")  # GridFS for file storage
+            self.fs = GridFS(self.db, collection="files")
             
-            print("MongoDB connection successful!")
+            connection_type = "MongoDB Atlas" if is_atlas else "Local MongoDB"
+            print(f"✓ {connection_type} connection successful!")
             
             # Create indexes for better query performance
             self._create_indexes()
         except Exception as e:
             raise ConnectionError(
-                f"Failed to connect to MongoDB: {str(e)}. Check your MONGODB_URL and network access."
+                f"Failed to connect to MongoDB: {e}. Check your MONGODB_URL and network access."
             )
 
     def _create_indexes(self):
