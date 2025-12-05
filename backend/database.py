@@ -43,7 +43,7 @@ class Database:
             self.fs = GridFS(self.db, collection="files")
             
             connection_type = "MongoDB Atlas" if is_atlas else "Local MongoDB"
-            print(f"✓ {connection_type} connection successful!")
+            print(f"[OK] {connection_type} connection successful!")
             
             # Create indexes for better query performance
             self._create_indexes()

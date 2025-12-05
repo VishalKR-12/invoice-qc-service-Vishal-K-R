@@ -8,6 +8,7 @@ import asyncio
 import logging
 from typing import Optional, List, Dict
 from datetime import datetime
+from dataclasses import asdict
 from models import ValidationResult, ProcessResponse, InvoiceSchema, GoogleVerificationResult, MergedExtractionResponse
 from pdf_extractor import PDFExtractor
 from validator import InvoiceValidator
@@ -98,6 +99,33 @@ async def extract_dual_source(file: UploadFile = File(...)):
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
             temp_file.write(content)
             temp_file_path = temp_file.name
+        
+        # Extract and merge from both sources
+        merge_result = merger.extract_and_merge(temp_file_path)
+        
+        return {
+            "success": True,
+            "pdf_data": merge_result.pdf_data,
+            "google_data": merge_result.google_data,
+            "final_output": merge_result.final_output,
+            "field_comparisons": [asdict(comp) for comp in merge_result.field_comparisons],
+            "mismatches": merge_result.mismatches,
+            "quality_score": merge_result.quality_score,
+            "notes": merge_result.notes,
+            "recommendation": merge_result.recommendation
+        }
+        
+    except Exception as e:
+        logger.error(f"Dual-source extraction failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Extraction error: {str(e)}")
+        
+    finally:
+        # Cleanup
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
 
 
 @app.post("/api/extract-document-ai")
@@ -195,30 +223,6 @@ async def extract_document_ai(file: UploadFile = File(...)):
             except:
                 pass
 
-        
-        # Perform dual-source extraction and merge
-        merge_result = merger.extract_and_merge(temp_file_path)
-        
-        # Convert to JSON response
-        response_data = merge_result.to_dict()
-        
-        return {
-            "success": True,
-            "merged_extraction": response_data,
-            "message": "Dual-source extraction completed successfully"
-        }
-        
-    except Exception as e:
-        logger.error(f"Dual-source extraction failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in dual-source extraction: {str(e)}")
-        
-    finally:
-        # Cleanup temp file
-        if temp_file_path and os.path.exists(temp_file_path):
-            try:
-                os.unlink(temp_file_path)
-            except:
-                pass
 
 def get_file_type(filename: str) -> str:
     """Determine file type from filename extension"""

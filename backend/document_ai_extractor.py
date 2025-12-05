@@ -113,7 +113,7 @@ class GoogleDocumentAIExtractor:
 
     def __init__(self):
         genai.configure(api_key=GEMINI_API_KEY)
-        self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
         
         # Document AI project config (would be set from environment)
         self.project_id = None
@@ -423,7 +423,8 @@ class GoogleDocumentAIExtractor:
         
         # Try parsing various formats
         formats = [
-            '%d/%m/%Y',
+            '%m/%d/%Y',  # MM/DD/YYYY (US format)
+            '%d/%m/%Y',  # DD/MM/YYYY (EU format)
             '%d-%m-%Y',
             '%d.%m.%Y',
             '%Y/%m/%d',
@@ -435,7 +436,6 @@ class GoogleDocumentAIExtractor:
             '%d/%b/%Y',
             '%d %b %Y',
             '%b %d, %Y',
-            '%Y/%m/%d',
         ]
         
         for fmt in formats:
