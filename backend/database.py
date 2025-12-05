@@ -12,7 +12,13 @@ from datetime import datetime
 class Database:
     def __init__(self):
         try:
-            self.client: MongoClient = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
+            self.client: MongoClient = MongoClient(
+    MONGODB_URL,
+    serverSelectionTimeoutMS=5000,
+    tls=True,
+    tlsAllowInvalidCertificates=True
+)
+
             # Test the connection
             self.client.server_info()
             self.db = self.client[MONGODB_DATABASE_NAME]
