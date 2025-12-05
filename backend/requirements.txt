@@ -19,7 +19,7 @@ python-docx==1.2.0
 pydantic==2.6.3
 
 # CORS middleware
-starlette==0.28.3
+starlette>=0.37.2
 
 # Optional: dotenv for environment variables
 python-dotenv==1.0.1
