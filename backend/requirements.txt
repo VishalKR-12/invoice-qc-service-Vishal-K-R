@@ -27,5 +27,5 @@ python-dotenv==1.0.1
 # Optional utilities
 requests==2.31.0
 
-pdfplumber==0.10.3
+ppdfplumber==0.11.0
 
