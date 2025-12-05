@@ -13,6 +13,7 @@ from pdf_extractor import PDFExtractor
 from validator import InvoiceValidator
 from google_verifier import GoogleVerifier
 from extraction_merger import ExtractionMerger
+from document_ai_extractor import GoogleDocumentAIExtractor
 from database import Database
 from pydantic import BaseModel
 import mimetypes
@@ -34,6 +35,7 @@ extractor = PDFExtractor()
 validator = InvoiceValidator()
 google_verifier = GoogleVerifier()
 merger = ExtractionMerger()
+document_ai_extractor = GoogleDocumentAIExtractor()
 
 @app.get("/")
 async def root():
@@ -96,6 +98,103 @@ async def extract_dual_source(file: UploadFile = File(...)):
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
             temp_file.write(content)
             temp_file_path = temp_file.name
+
+
+@app.post("/api/extract-document-ai")
+async def extract_document_ai(file: UploadFile = File(...)):
+    """
+    Google Document AI Invoice Parser - Structured extraction.
+    
+    Process:
+    1. Use Google Document AI Invoice Parser for structured extraction
+    2. Prioritize structured fields (highest confidence)
+    3. Fill missing fields from OCR text analysis
+    4. Normalize all data (amounts, dates, GST)
+    5. Return clean, normalized JSON
+    
+    Output Format:
+    {
+        "supplier_name": "string or null",
+        "supplier_address": "string or null",
+        "supplier_gst": "string or null",
+        
+        "customer_name": "string or null",
+        "customer_address": "string or null",
+        "customer_gst": "string or null",
+        
+        "invoice_number": "string or null",
+        "invoice_date": "YYYY-MM-DD or null",
+        "due_date": "YYYY-MM-DD or null",
+        
+        "items": [
+            {
+                "description": "string",
+                "quantity": "number or null",
+                "unit_price": "number or null",
+                "tax_percent": "number or null",
+                "amount": "number or null"
+            }
+        ],
+        
+        "subtotal": "number or null",
+        "tax_amount": "number or null",
+        "total_amount": "number or null"
+    }
+    
+    Rules:
+    - ONLY include fields found in invoice (no guessing)
+    - Prioritize Document AI structured data over OCR
+    - Normalize amounts: remove symbols, thousand separators
+    - Dates in YYYY-MM-DD format
+    - GST: 15-digit normalized format (Indian GST)
+    """
+    
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+    
+    filename_lower = file.filename.lower()
+    if not filename_lower.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files supported")
+    
+    content = await file.read()
+    file_size = len(content)
+    
+    if file_size > 35 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File exceeds 35MB")
+    
+    if file_size == 0:
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    temp_file_path = None
+    
+    try:
+        # Write to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        # Extract using Document AI
+        invoice_data = document_ai_extractor.extract_from_pdf(temp_file_path)
+        
+        # Return clean JSON
+        return {
+            "success": True,
+            "data": invoice_data.to_dict(),
+            "message": "Invoice extracted successfully using Document AI"
+        }
+        
+    except Exception as e:
+        logger.error(f"Document AI extraction failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Extraction error: {str(e)}")
+        
+    finally:
+        # Cleanup
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
+
         
         # Perform dual-source extraction and merge
         merge_result = merger.extract_and_merge(temp_file_path)
