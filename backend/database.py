@@ -8,16 +8,19 @@ from bson import ObjectId
 from config import MONGODB_URL, MONGODB_DATABASE_NAME
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import ssl
+import os
 
 class Database:
     def __init__(self):
         try:
             self.client: MongoClient = MongoClient(
-    MONGODB_URL,
-    serverSelectionTimeoutMS=5000,
-    tls=True,
-    tlsAllowInvalidCertificates=True
-)
+                MONGODB_URL,
+                tls=True,
+                tlsAllowInvalidCertificates=False,
+                tlsVersion=ssl.PROTOCOL_TLS_CLIENT,  # Ensures TLS 1.2+
+                serverSelectionTimeoutMS=10000       # 10 seconds
+            )
 
             # Test the connection
             self.client.server_info()
@@ -25,10 +28,14 @@ class Database:
             self.collection: Collection = self.db["invoices"]
             self.fs = GridFS(self.db, collection="files")  # GridFS for file storage
             
+            print("MongoDB connection successful!")
+            
             # Create indexes for better query performance
             self._create_indexes()
         except Exception as e:
-            raise ConnectionError(f"Failed to connect to MongoDB: {str(e)}. Please check your MONGODB_URL in .env file.")
+            raise ConnectionError(
+                f"Failed to connect to MongoDB: {str(e)}. Check your MONGODB_URL and network access."
+            )
 
     def _create_indexes(self):
         """Create indexes for common queries"""
