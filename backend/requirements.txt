@@ -29,3 +29,4 @@ requests==2.31.0
 
 pdfplumber==0.11.0
 
+google-generativeai==0.7.2
