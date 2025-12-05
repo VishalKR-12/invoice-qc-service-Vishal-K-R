@@ -1039,8 +1039,3 @@ For issues or questions, please refer to the documentation files:
 - Backend API docs: `http://localhost:8000/docs` (when running)
 
 ---
-
-**Built with AI assistance (Claude by Anthropic)**
-#   i n v o i c e - q c - s e r v i c e - V i s h a l - K - R 
- 
- 
