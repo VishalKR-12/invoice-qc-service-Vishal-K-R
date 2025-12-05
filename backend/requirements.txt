@@ -7,7 +7,7 @@ pymongo[srv]==4.6.1
 dnspython==2.3.0
 
 # PDF extraction
-pdfminer.six = 20231228
+pdfminer.six==20231228
 
 # Image handling
 Pillow==9.5.0
