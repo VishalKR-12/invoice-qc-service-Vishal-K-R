@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +11,18 @@
     <!-- Mammoth.js for DOCX rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
+
 <body>
     <div class="app-container">
         <aside class="sidebar">
             <div class="logo">
-                <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
+                <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
                 </svg>
                 <span class="logo-text">Invoicely</span>
             </div>
@@ -27,37 +30,37 @@
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" data-page="dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/>
-                        <rect x="14" y="3" width="7" height="7"/>
-                        <rect x="14" y="14" width="7" height="7"/>
-                        <rect x="3" y="14" width="7" height="7"/>
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
                     </svg>
                     <span>Dashboard</span>
                 </a>
                 <a href="#" class="nav-item" data-page="upload">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                     <span>Upload & Process</span>
                 </a>
                 <a href="#" class="nav-item" data-page="invoices">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
                     </svg>
                     <span>All Invoices</span>
                 </a>
                 <a href="#" class="nav-item" data-page="documentation">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <line x1="10" y1="9" x2="8" y2="9"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <line x1="10" y1="9" x2="8" y2="9" />
                     </svg>
                     <span>Documentation</span>
                 </a>
@@ -78,26 +81,30 @@
             <header class="top-header">
                 <h1 class="page-title">Dashboard</h1>
                 <div class="header-actions">
-                    <button class="icon-button" id="theme-toggle-btn" title="Toggle theme" aria-label="Toggle dark/light theme">
-                        <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                            <circle cx="12" cy="12" r="5"/>
-                            <line x1="12" y1="1" x2="12" y2="3"/>
-                            <line x1="12" y1="21" x2="12" y2="23"/>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                            <line x1="1" y1="12" x2="3" y2="12"/>
-                            <line x1="21" y1="12" x2="23" y2="12"/>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    <button class="icon-button" id="theme-toggle-btn" title="Toggle theme"
+                        aria-label="Toggle dark/light theme">
+                        <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" style="display: none;">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                         </svg>
-                        <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                         </svg>
                     </button>
                     <button class="icon-button" title="Notifications">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                         </svg>
                     </button>
                 </div>
@@ -129,25 +136,29 @@
 
                         <div class="feature-list">
                             <div class="feature-item">
-                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
+                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
                                 </svg>
                                 <p>Varying templates of invoices processed in seconds.</p>
                             </div>
 
                             <div class="feature-item">
-                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="9 11 12 14 22 4"/>
+                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="9 11 12 14 22 4" />
                                 </svg>
-                                <p>Get your extracted data across two levels of accuracy checks - automated validations and manual reviews for unsure extractions.</p>
+                                <p>Get your extracted data across two levels of accuracy checks - automated validations
+                                    and manual reviews for unsure extractions.</p>
                             </div>
 
                             <div class="feature-item">
-                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M12 6v6l4 2"/>
+                                <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
                                 </svg>
                                 <p>Save as much as 80% on costs and manual review time with our self-learning AI.</p>
                             </div>
@@ -162,7 +173,7 @@
                                 <span>Invoice Extraction</span>
                                 <button class="play-button">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                        <polygon points="5 3 19 12 5 21 5 3" />
                                     </svg>
                                 </button>
                             </div>
@@ -177,23 +188,42 @@
             <div id="upload-page" class="page-content">
                 <div class="upload-container">
                     <h2 class="section-title">Test-drive Document AI</h2>
-                    <p class="section-subtitle">Upload your own set of documents or use our samples to see how our data extraction works.</p>
+                    <p class="section-subtitle">Upload your own set of documents or use our samples to see how our data
+                        extraction works.</p>
                     <p class="section-note">[Supports up to 5 pages & 35MB]</p>
 
+                    <div class="extraction-options-container"
+                        style="margin-bottom: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <label for="extraction-mode" style="font-weight: 600; color: var(--text-primary);">Extraction
+                            Mode</label>
+                        <select id="extraction-mode"
+                            style="padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-primary); font-family: inherit; cursor: pointer; min-width: 300px; font-size: 1rem;">
+                            <option value="auto" selected>Auto (Recommended)</option>
+                            <option value="google_document_ai">Google Document AI</option>
+                            <option value="gemini_extraction">Gemini Extraction</option>
+                            <option value="pdf_extractor">PDF Extractor (Fallback)</option>
+                        </select>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Select your preferred
+                            extraction engine or let Auto decide.</p>
+                    </div>
+
                     <div class="upload-area" id="upload-area">
-                        <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="17 8 12 3 7 8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
                         <h3>Upload Invoice PDFs</h3>
-                        <p>Drag and drop PDF files here, or click to browse. Supports multiple PDF files for batch processing.</p>
+                        <p>Drag and drop PDF files here, or click to browse. Supports multiple PDF files for batch
+                            processing.</p>
                         <input type="file" id="file-input" accept=".pdf" multiple style="display: none;">
                         <button class="btn-primary" id="upload-btn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                             UPLOAD NOW
                         </button>
@@ -209,7 +239,7 @@
                             <p id="progress-text" class="progress-text">0 / 0 files processed</p>
                         </div>
                     </div>
-                    
+
                     <div id="batch-results-container" class="batch-results-container" style="display: none;">
                         <h3>Batch Processing Results</h3>
                         <div id="batch-results-summary" class="batch-results-summary"></div>
@@ -224,12 +254,15 @@
                         <div class="results-header-top">
                             <div class="results-header-content">
                                 <h2 class="section-title">Test-drive Document AI</h2>
-                                <p class="section-subtitle">Upload your own set of documents or use our samples to see how our data extraction works.</p>
-                                <p class="section-note">[Supports up to 5 pages & 35MB per file. Batch upload: up to 50 files]</p>
+                                <p class="section-subtitle">Upload your own set of documents or use our samples to see
+                                    how our data extraction works.</p>
+                                <p class="section-note">[Supports up to 5 pages & 35MB per file. Batch upload: up to 50
+                                    files]</p>
                             </div>
                             <button class="btn-back-to-batch" id="back-to-batch-btn" style="display: none;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="15 18 9 12 15 6"/>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6" />
                                 </svg>
                                 Back to Batch Results
                             </button>
@@ -239,10 +272,11 @@
                     <div class="results-layout">
                         <div class="results-sidebar">
                             <button class="btn-secondary" id="upload-new-btn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17 8 12 3 7 8"/>
-                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
                                 UPLOAD NOW
                             </button>
@@ -254,46 +288,53 @@
                                     </div>
                                     <div class="preview-controls">
                                         <button class="preview-control-btn" id="zoom-out-btn" title="Zoom Out">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <circle cx="11" cy="11" r="8"/>
-                                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                                <line x1="8" y1="11" x2="14" y2="11"/>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="11" cy="11" r="8" />
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                                <line x1="8" y1="11" x2="14" y2="11" />
                                             </svg>
                                         </button>
                                         <span class="zoom-level" id="zoom-level">100%</span>
                                         <button class="preview-control-btn" id="zoom-in-btn" title="Zoom In">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <circle cx="11" cy="11" r="8"/>
-                                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                                <line x1="11" y1="8" x2="11" y2="14"/>
-                                                <line x1="8" y1="11" x2="14" y2="11"/>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="11" cy="11" r="8" />
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                                <line x1="11" y1="8" x2="11" y2="14" />
+                                                <line x1="8" y1="11" x2="14" y2="11" />
                                             </svg>
                                         </button>
                                         <button class="preview-control-btn" id="fit-width-btn" title="Fit to Width">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                                <line x1="3" y1="9" x2="21" y2="9"/>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                <line x1="3" y1="9" x2="21" y2="9" />
                                             </svg>
                                         </button>
                                         <button class="preview-control-btn" id="fit-page-btn" title="Fit to Page">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" />
                                             </svg>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="preview-navigation" id="preview-navigation" style="display: none;">
                                     <button class="nav-btn" id="prev-page-btn" title="Previous Page">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="15 18 9 12 15 6"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="15 18 9 12 15 6" />
                                         </svg>
                                     </button>
-                                    <input type="number" id="page-input" class="page-input" min="1" value="1" title="Page Number">
+                                    <input type="number" id="page-input" class="page-input" min="1" value="1"
+                                        title="Page Number">
                                     <span class="page-separator">/</span>
                                     <span id="total-pages" class="total-pages">1</span>
                                     <button class="nav-btn" id="next-page-btn" title="Next Page">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
                                         </svg>
                                     </button>
                                 </div>
@@ -305,14 +346,16 @@
                                     <canvas id="pdf-canvas" class="preview-canvas" style="display: none;"></canvas>
                                     <img id="image-preview" class="preview-image" style="display: none;" alt="Preview">
                                     <div id="docx-preview" class="docx-preview" style="display: none;"></div>
-                                    <iframe id="pdf-preview" class="pdf-viewer" frameborder="0" style="display: none;"></iframe>
+                                    <iframe id="pdf-preview" class="pdf-viewer" frameborder="0"
+                                        style="display: none;"></iframe>
                                     <div id="pdf-preview-placeholder" class="pdf-preview-placeholder">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                            <polyline points="14 2 14 8 20 8"/>
-                                            <line x1="16" y1="13" x2="8" y2="13"/>
-                                            <line x1="16" y1="17" x2="8" y2="17"/>
-                                            <polyline points="10 9 9 9 8 9"/>
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                            <line x1="16" y1="13" x2="8" y2="13" />
+                                            <line x1="16" y1="17" x2="8" y2="17" />
+                                            <polyline points="10 9 9 9 8 9" />
                                         </svg>
                                         <p>File Preview</p>
                                     </div>
@@ -328,18 +371,20 @@
 
                             <div class="action-buttons">
                                 <button class="btn-outline" id="download-csv-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7 10 12 15 17 10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
                                     </svg>
                                     Download CSV
                                 </button>
                                 <button class="btn-outline" id="download-json-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7 10 12 15 17 10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
                                     </svg>
                                     Download JSON
                                 </button>
@@ -372,17 +417,19 @@
 
                                 <div class="action-footer">
                                     <button class="btn-outline" id="start-over-btn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="1 4 1 10 7 10"/>
-                                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="1 4 1 10 7 10" />
+                                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
                                         </svg>
                                         Start Over
                                     </button>
                                     <button class="btn-primary" id="save-all-btn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                                            <polyline points="17 21 17 13 7 13 7 21"/>
-                                            <polyline points="7 3 7 8 15 8"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                            <polyline points="17 21 17 13 7 13 7 21" />
+                                            <polyline points="7 3 7 8 15 8" />
                                         </svg>
                                         Save All (1)
                                     </button>
@@ -427,17 +474,27 @@
                     <div class="doc-content">
                         <div class="doc-section">
                             <h3>About Invoicely</h3>
-                            <p>Invoicely is a complete <strong>Invoice Extraction & Quality Control Service</strong> that automatically extracts structured data from PDF invoices, validates the extracted information against comprehensive business rules, and provides quality control reports through multiple interfaces.</p>
+                            <p>Invoicely is a complete <strong>Invoice Extraction & Quality Control Service</strong>
+                                that automatically extracts structured data from PDF invoices, validates the extracted
+                                information against comprehensive business rules, and provides quality control reports
+                                through multiple interfaces.</p>
                         </div>
 
                         <div class="doc-section">
                             <h3>Core Components</h3>
                             <ul class="doc-list">
-                                <li><strong>PDF Extraction Module</strong> - Extracts structured data from PDF invoices using text parsing and pattern matching with support for multiple invoice formats</li>
-                                <li><strong>Validation Core</strong> - Validates extracted data against completeness, format, business logic, and anomaly detection rules with a 100-point scoring system</li>
-                                <li><strong>CLI Tool</strong> - Command-line interface for batch processing invoices (extract, validate, or full-run)</li>
-                                <li><strong>HTTP API</strong> - RESTful API built with FastAPI for programmatic access to all features</li>
-                                <li><strong>Web UI</strong> - Full-featured web application for interactive invoice processing and management</li>
+                                <li><strong>PDF Extraction Module</strong> - Extracts structured data from PDF invoices
+                                    using text parsing and pattern matching with support for multiple invoice formats
+                                </li>
+                                <li><strong>Validation Core</strong> - Validates extracted data against completeness,
+                                    format, business logic, and anomaly detection rules with a 100-point scoring system
+                                </li>
+                                <li><strong>CLI Tool</strong> - Command-line interface for batch processing invoices
+                                    (extract, validate, or full-run)</li>
+                                <li><strong>HTTP API</strong> - RESTful API built with FastAPI for programmatic access
+                                    to all features</li>
+                                <li><strong>Web UI</strong> - Full-featured web application for interactive invoice
+                                    processing and management</li>
                             </ul>
                         </div>
 
@@ -461,10 +518,14 @@
 
                         <div class="doc-section">
                             <h3>Validation Rules (14+ Rules)</h3>
-                            <p><strong>Completeness Rules:</strong> Ensures invoice number, vendor name, total amount, and invoice date are present.</p>
-                            <p><strong>Format Validation:</strong> Validates date formats, amount types, currency codes, and invoice number length.</p>
-                            <p><strong>Business Logic:</strong> Checks that due dates are after invoice dates, amounts calculate correctly (subtotal + tax = total), and payment terms are reasonable.</p>
-                            <p><strong>Anomaly Detection:</strong> Flags unusual patterns like duplicate vendors/buyers, extremely high amounts, very old invoices, or future-dated invoices.</p>
+                            <p><strong>Completeness Rules:</strong> Ensures invoice number, vendor name, total amount,
+                                and invoice date are present.</p>
+                            <p><strong>Format Validation:</strong> Validates date formats, amount types, currency codes,
+                                and invoice number length.</p>
+                            <p><strong>Business Logic:</strong> Checks that due dates are after invoice dates, amounts
+                                calculate correctly (subtotal + tax = total), and payment terms are reasonable.</p>
+                            <p><strong>Anomaly Detection:</strong> Flags unusual patterns like duplicate vendors/buyers,
+                                extremely high amounts, very old invoices, or future-dated invoices.</p>
                         </div>
 
                         <div class="doc-section">
@@ -482,11 +543,15 @@
                             <p><strong>Via Web UI (This Application):</strong></p>
                             <ul class="doc-list">
                                 <li>Navigate to <strong>Dashboard</strong> to view statistics</li>
-                                <li>Go to <strong>Upload & Process</strong> to upload PDF invoices (single or batch)</li>
-                                <li>View <strong>Extraction Results</strong> with validation score and extracted data</li>
+                                <li>Go to <strong>Upload & Process</strong> to upload PDF invoices (single or batch)
+                                </li>
+                                <li>View <strong>Extraction Results</strong> with validation score and extracted data
+                                </li>
                                 <li>Browse <strong>All Invoices</strong> to manage processed documents</li>
                             </ul>
-                            <p><strong>Via API:</strong> Full REST API available at <code>http://localhost:8000/docs</code> with endpoints for upload, validation, and invoice management.</p>
+                            <p><strong>Via API:</strong> Full REST API available at
+                                <code>http://localhost:8000/docs</code> with endpoints for upload, validation, and
+                                invoice management.</p>
                             <p><strong>Via CLI:</strong> Command-line tools for batch extraction and validation:</p>
                             <ul class="doc-list">
                                 <li><code>python cli.py extract --pdf-dir ./invoices --output extracted.json</code></li>
@@ -498,11 +563,13 @@
                         <div class="doc-section">
                             <h3>Supported File Types</h3>
                             <ul class="doc-list">
-                                <li><strong>PDF</strong> - Portable Document Format (text-based or scanned with OCR setup)</li>
+                                <li><strong>PDF</strong> - Portable Document Format (text-based or scanned with OCR
+                                    setup)</li>
                                 <li><strong>Supported PDF Types</strong>:
                                     <ul>
                                         <li>Text-based PDFs - Direct text extraction using pdfplumber</li>
-                                        <li>Scanned PDFs - Requires Tesseract OCR setup (supports English and German)</li>
+                                        <li>Scanned PDFs - Requires Tesseract OCR setup (supports English and German)
+                                        </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -519,7 +586,8 @@
 
                         <div class="doc-section">
                             <h3>Language Support</h3>
-                            <p>Currently optimized for <strong>English and German</strong> invoices with automatic language detection.</p>
+                            <p>Currently optimized for <strong>English and German</strong> invoices with automatic
+                                language detection.</p>
                         </div>
 
                         <div class="doc-section">
@@ -536,8 +604,10 @@
                         <div class="doc-section">
                             <h3>Advanced Features</h3>
                             <ul class="doc-list">
-                                <li><strong>OCR Support:</strong> Tesseract OCR for scanned PDF documents (supports English and German)</li>
-                                <li><strong>Batch Processing:</strong> Process up to 50 PDF files simultaneously with concurrency control (max 5 concurrent)</li>
+                                <li><strong>OCR Support:</strong> Tesseract OCR for scanned PDF documents (supports
+                                    English and German)</li>
+                                <li><strong>Batch Processing:</strong> Process up to 50 PDF files simultaneously with
+                                    concurrency control (max 5 concurrent)</li>
                                 <li><strong>File Preview:</strong> PDF.js with zoom and page navigation controls</li>
                                 <li><strong>Data Export:</strong> Download results as CSV or JSON</li>
                             </ul>
@@ -567,7 +637,8 @@
                         </div>
 
                         <div class="doc-section doc-footer">
-                            <p><strong>Need Help?</strong> Check the documentation files in the project root or visit <code>http://localhost:8000/docs</code> for interactive API documentation.</p>
+                            <p><strong>Need Help?</strong> Check the documentation files in the project root or visit
+                                <code>http://localhost:8000/docs</code> for interactive API documentation.</p>
                         </div>
                     </div>
                 </div>
@@ -577,4 +648,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

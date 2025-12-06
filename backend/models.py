@@ -87,4 +87,5 @@ class ProcessResponse(BaseModel):
     invoice_id: Optional[str] = None
     validation_result: Optional[ValidationResult] = None
     merged_extraction: Optional[MergedExtractionResponse] = None
+    extraction_metadata: Optional[Dict[str, Any]] = None  # New field for model info
     message: str

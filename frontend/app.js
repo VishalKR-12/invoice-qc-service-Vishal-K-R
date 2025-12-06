@@ -352,6 +352,12 @@ async function handleFileUpload(file) {
     const formData = new FormData();
     formData.append('file', file);
 
+    // Add extraction mode preference
+    const extractionModeElement = document.getElementById('extraction-mode');
+    if (extractionModeElement) {
+        formData.append('extraction_method', extractionModeElement.value);
+    }
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/upload`, {
             method: 'POST',
@@ -757,6 +763,22 @@ function displayResults(data, filename, showPreview = true) {
             statusBadge.style.background = '#FFC107';
         } else {
             statusBadge.style.background = '#DC3545';
+        }
+
+        // Remove existing model badge if any
+        const existingModelBadge = document.getElementById('model-badge');
+        if (existingModelBadge) existingModelBadge.remove();
+
+        // Add model badge if metadata exists
+        if (data.extraction_metadata && data.extraction_metadata.model_used) {
+            const modelBadge = document.createElement('span');
+            modelBadge.id = 'model-badge';
+            modelBadge.className = 'status-badge';
+            modelBadge.style.marginLeft = '10px';
+            modelBadge.style.background = '#4A90E2'; // Blue
+            modelBadge.textContent = `Model: ${data.extraction_metadata.model_used}`;
+            modelBadge.title = `Confidence: ${data.extraction_metadata.confidence || 'N/A'}`;
+            statusBadge.parentNode.appendChild(modelBadge);
         }
     }
 

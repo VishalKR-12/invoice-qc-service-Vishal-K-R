@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from fastapi.responses import FileResponse
@@ -249,7 +249,10 @@ def get_file_type(filename: str) -> str:
         return 'other'
 
 @app.post("/api/upload", response_model=ProcessResponse)
-async def upload_and_process(file: UploadFile = File(...)):
+async def upload_and_process(
+    file: UploadFile = File(...),
+    extraction_method: str = Form("auto")  # New: Selection of extraction engine
+):
     # Support multiple file types
     supported_extensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.docx']
     if not file.filename:
@@ -275,6 +278,12 @@ async def upload_and_process(file: UploadFile = File(...)):
     invoice_id = None
     file_id = None
     
+    extraction_metadata = {
+        "method_requested": extraction_method,
+        "model_used": "unknown",
+        "confidence": 0.0
+    }
+    
     try:
         # Determine file type
         file_type = get_file_type(file.filename)
@@ -289,12 +298,90 @@ async def upload_and_process(file: UploadFile = File(...)):
                 temp_file.write(content)
                 temp_file_path = temp_file.name
 
-            extracted_data = extractor.extract_from_pdf(temp_file_path)
+            # --- EXTRACTION LOGIC START ---
+            
+            # Determine which extractor to use
+            selected_method = extraction_method
+            
+            # AUTO MODE LOGIC
+            if extraction_method == "auto":
+                # Priority 1: Google Document AI (if configured)
+                # We check compatibility by looking at environment vars loaded in extractor
+                if document_ai_extractor.document_ai_client:
+                    selected_method = "google_document_ai"
+                # Priority 2: Gemini (if available)
+                elif enhanced_extractor.gemini_available:
+                    selected_method = "gemini_extraction"
+                # Priority 3: Standard PDF Extractor (fallback)
+                else:
+                    selected_method = "pdf_extractor"
+            
+            logger.info(f"Extraction method selected: {selected_method} (Request: {extraction_method})")
+            extraction_metadata["model_used"] = selected_method
+
+            try:
+                # EXECUTE EXTRACTION BASED ON SELECTION
+                if selected_method == "google_document_ai":
+                    try:
+                        doc_ai_result = document_ai_extractor.extract_from_pdf(temp_file_path)
+                        # Convert to InvoiceSchema
+                        extracted_data = InvoiceSchema(**doc_ai_result.to_dict())
+                        extraction_metadata["model_used"] = "Google Document AI"
+                        extraction_metadata["confidence"] = 95.0 # DocAI is high confidence
+                    except Exception as e:
+                        logger.warning(f"Document AI failed: {e}. Falling back to next best.")
+                        # Fallback chain for auto or explicit failure
+                        if extraction_method == "auto":
+                             if enhanced_extractor.gemini_available:
+                                 # Fallback to Gemini
+                                 raw_data = enhanced_extractor.extract_from_pdf(temp_file_path)
+                                 extracted_data = InvoiceSchema(**raw_data)
+                                 extraction_metadata["model_used"] = "Gemini Extraction (Fallback)"
+                                 extraction_metadata["confidence"] = 85.0
+                             else:
+                                 extracted_data = extractor.extract_from_pdf(temp_file_path)
+                                 extraction_metadata["model_used"] = "PDF Extractor (Fallback)"
+                                 extraction_metadata["confidence"] = 60.0
+                        else:
+                            raise e
+
+                elif selected_method == "gemini_extraction":
+                    # Use Enhanced Extractor (Gemini)
+                    raw_data = enhanced_extractor.extract_from_pdf(temp_file_path)
+                    # Convert dict to InvoiceSchema
+                    # Check if raw_data is already schema or dict
+                    if isinstance(raw_data, dict):
+                         extracted_data = InvoiceSchema(**raw_data)
+                    else:
+                         extracted_data = raw_data
+                    
+                    extraction_metadata["model_used"] = "Gemini Extraction"
+                    extraction_metadata["confidence"] = 90.0
+
+                elif selected_method == "pdf_extractor":
+                    # Use Standard Regex Extractor
+                    extracted_data = extractor.extract_from_pdf(temp_file_path)
+                    extraction_metadata["model_used"] = "PDF Extractor (Regex)"
+                    extraction_metadata["confidence"] = 70.0
+
+                else:
+                    # Default/Unknown -> Standard
+                    extracted_data = extractor.extract_from_pdf(temp_file_path)
+                    extraction_metadata["model_used"] = "PDF Extractor (Default)"
+            
+            except Exception as extraction_error:
+                logger.error(f"Selected extraction failed: {extraction_error}")
+                # Ultimate fallback
+                extracted_data = extractor.extract_from_pdf(temp_file_path)
+                extraction_metadata["model_used"] = "PDF Extractor (Emergency Fallback)"
+                extraction_metadata["error"] = str(extraction_error)
 
             # Clean up temp file immediately after extraction
             if os.path.exists(temp_file_path):
                 os.unlink(temp_file_path)
                 temp_file_path = None
+            
+            # --- EXTRACTION LOGIC END ---
 
             validation_result = validator.validate(extracted_data)
         else:
@@ -325,6 +412,7 @@ async def upload_and_process(file: UploadFile = File(...)):
             invoice_data_dict = extracted_data.model_dump() if extracted_data else {}
             invoice_data_dict["file_name"] = file.filename
             invoice_data_dict["file_type"] = file_type
+            invoice_data_dict["extraction_metadata"] = extraction_metadata # Save metadata
             
             invoice_id = db.save_invoice(
                 invoice_data_dict,
@@ -342,7 +430,8 @@ async def upload_and_process(file: UploadFile = File(...)):
             success=True,
             invoice_id=invoice_id,
             validation_result=validation_result,
-            message="Invoice processed successfully"
+            extraction_metadata=extraction_metadata,
+            message=f"Invoice processed using {extraction_metadata['model_used']}"
         )
 
     except Exception as e:
