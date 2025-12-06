@@ -1611,3 +1611,29 @@ body {
     }
 }
 
+
+
+/* Dark Mode Dropdown Fixes */
+[data-theme='dark'] #extraction-mode {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] #extraction-mode option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .extraction-options-container {
+    background-color: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+
+/* Line Items Table Dark Mode Fix */
+[data-theme='dark'] .line-items-table th {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color);
+}

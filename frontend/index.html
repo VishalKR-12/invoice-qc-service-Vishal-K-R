@@ -198,10 +198,10 @@
                             Mode</label>
                         <select id="extraction-mode"
                             style="padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-primary); font-family: inherit; cursor: pointer; min-width: 300px; font-size: 1rem;">
-                            <option value="auto" selected>Auto (Recommended)</option>
-                            <option value="google_document_ai">Google Document AI</option>
-                            <option value="gemini_extraction">Gemini Extraction</option>
-                            <option value="pdf_extractor">PDF Extractor (Fallback)</option>
+                            <option value="auto" selected>🧠 Auto (Recommended)</option>
+                            <option value="google_document_ai">🧾 Google Document AI</option>
+                            <option value="gemini_extraction">👁️‍🗨️ Gemini Vision</option>
+                            <option value="pdf_extractor">📄 PDF Extractor</option>
                         </select>
                         <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Select your preferred
                             extraction engine or let Auto decide.</p>
@@ -551,7 +551,8 @@
                             </ul>
                             <p><strong>Via API:</strong> Full REST API available at
                                 <code>http://localhost:8000/docs</code> with endpoints for upload, validation, and
-                                invoice management.</p>
+                                invoice management.
+                            </p>
                             <p><strong>Via CLI:</strong> Command-line tools for batch extraction and validation:</p>
                             <ul class="doc-list">
                                 <li><code>python cli.py extract --pdf-dir ./invoices --output extracted.json</code></li>
@@ -638,7 +639,8 @@
 
                         <div class="doc-section doc-footer">
                             <p><strong>Need Help?</strong> Check the documentation files in the project root or visit
-                                <code>http://localhost:8000/docs</code> for interactive API documentation.</p>
+                                <code>http://localhost:8000/docs</code> for interactive API documentation.
+                            </p>
                         </div>
                     </div>
                 </div>
