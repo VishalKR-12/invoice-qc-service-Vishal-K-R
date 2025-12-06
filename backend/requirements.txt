@@ -8,6 +8,7 @@ dnspython==2.3.0
 
 # PDF extraction
 pdfminer.six==20231228
+pdfplumber==0.11.0
 
 # Image handling
 Pillow==9.5.0
@@ -15,20 +16,33 @@ Pillow==9.5.0
 # Docx handling
 python-docx==1.2.0
 
-# Pydantic
+# Pydantic for data validation
 pydantic==2.6.3
 
 # CORS middleware
 starlette>=0.37.2
 
-# Optional: dotenv for environment variables
+# Environment variables
 python-dotenv==1.0.1
 
-# Optional utilities
+# HTTP requests
 requests==2.31.0
 
-pdfplumber==0.11.0
+# Date parsing
+python-dateutil==2.9.0.post0
 
+# Google AI
 google-generativeai==0.7.2
 
-python-dateutil==2.9.0.post0
+# Optional: Google Document AI (uncomment if using)
+# google-cloud-documentai==2.20.0
+
+# Optional: OCR support (uncomment if using)
+# pytesseract==0.3.10
+# pdf2image==1.16.3
+
+# Optional: Google Verifier dependencies
+# google-api-python-client==2.100.0
+# google-auth==2.23.0
+# google-auth-oauthlib==1.1.0
+# google-auth-httplib2==0.1.1

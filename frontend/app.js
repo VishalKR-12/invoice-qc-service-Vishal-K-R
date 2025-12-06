@@ -1,5 +1,5 @@
-const API_BASE_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
-//const API_BASE_URL = "http://localhost:8000"  
+//const API_BASE_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
+const API_BASE_URL = "http://localhost:8000"
 
 let currentInvoiceData = null;
 let currentPdfFile = null; // Store uploaded PDF file for preview
@@ -28,14 +28,14 @@ function canProceedWithUpload(fileName) {
         console.warn('Upload already in progress. Ignoring duplicate request.');
         return false;
     }
-    
+
     // Same file uploaded too recently
-    if (fileName === lastUploadedFileName && 
+    if (fileName === lastUploadedFileName &&
         Date.now() - lastUploadTimestamp < UPLOAD_COOLDOWN_MS) {
         console.warn('Duplicate file upload attempt within cooldown period. Ignoring.');
         return false;
     }
-    
+
     return true;
 }
 
@@ -79,7 +79,7 @@ async function testBackendConnection() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     try {
         // Test backend connection first
         testBackendConnection().then(isConnected => {
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.warn('Backend not connected. Some features may not work.');
             }
         });
-        
+
         initializeNavigation();
         initializeUpload();
         initializeTabs();
@@ -161,7 +161,7 @@ function navigateToPage(page) {
                 item.classList.remove('active');
             }
         });
-        
+
         // Add active class to selected nav item
         const navItem = document.querySelector(`[data-page="${page}"]`);
         if (navItem && navItem.classList) {
@@ -174,7 +174,7 @@ function navigateToPage(page) {
                 content.classList.remove('active');
             }
         });
-        
+
         // Add active class to selected page
         const pageElement = document.getElementById(`${page}-page`);
         if (pageElement && pageElement.classList) {
@@ -197,7 +197,7 @@ function navigateToPage(page) {
         if (page === 'invoices') {
             loadInvoices();
         }
-        
+
         // When navigating to upload page, restore batch results if available
         if (page === 'upload' && batchResultsData) {
             // Small delay to ensure page is rendered
@@ -231,7 +231,7 @@ function initializeThemeToggle() {
     // Get saved theme preference or default to light
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
-    
+
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
@@ -324,13 +324,13 @@ function initializeUpload() {
 
 async function handleFileUpload(file) {
     const fileName = file.name.toLowerCase();
-    
+
     // DUPLICATE PREVENTION: Check if this upload should be blocked
     if (!canProceedWithUpload(fileName)) {
         alert('File is already being uploaded. Please wait.');
         return;
     }
-    
+
     if (!fileName.endsWith('.pdf')) {
         alert('Only PDF files are supported.');
         return;
@@ -371,11 +371,11 @@ async function handleFileUpload(file) {
         }
 
         const result = await response.json();
-        
+
         if (!result || !result.validation_result) {
             throw new Error('Invalid response from server');
         }
-        
+
         currentInvoiceData = result;
         currentPdfFile = file; // Store file for preview
 
@@ -393,19 +393,19 @@ async function handleFileUpload(file) {
                 processingIndicator.style.display = 'none';
             }
         }
-        
+
         // DUPLICATE PREVENTION: Mark upload as finished
         markUploadFinished();
 
     } catch (error) {
         console.error('Error uploading file:', error);
-        
+
         // DUPLICATE PREVENTION: Mark upload as finished even on error
         markUploadFinished();
-        
+
         // Show detailed error message
         let errorMessage = 'Error processing invoice. ';
-        
+
         if (error.name === 'TypeError' && error.message && error.message.includes('fetch')) {
             errorMessage += 'Cannot connect to backend server. Please ensure:\n';
             errorMessage += '1. Backend is running on http://localhost:8000\n';
@@ -416,7 +416,7 @@ async function handleFileUpload(file) {
         } else {
             errorMessage += 'Unknown error occurred. Please check the browser console for details.';
         }
-        
+
         alert(errorMessage);
         if (processingIndicator) {
             processingIndicator.style.display = 'none';
@@ -428,10 +428,10 @@ async function handleBatchUpload(files) {
     // Validate files
     const validFiles = [];
     const invalidFiles = [];
-    
+
     for (const file of files) {
         const fileName = file.name.toLowerCase();
-        
+
         if (!fileName.endsWith('.pdf')) {
             invalidFiles.push(file.name);
             continue;
@@ -442,27 +442,27 @@ async function handleBatchUpload(files) {
         }
         validFiles.push(file);
     }
-    
+
     if (invalidFiles.length > 0) {
         alert(`Invalid files:\n${invalidFiles.join('\n')}\n\nOnly PDF files under 35MB are supported.`);
     }
-    
+
     if (validFiles.length === 0) {
         return;
     }
-    
+
     if (validFiles.length > 50) {
         alert('Maximum 50 files allowed per batch. Please select fewer files.');
         return;
     }
-    
+
     // Show processing indicator
     const processingIndicator = document.getElementById('processing-indicator');
     const processingMessage = document.getElementById('processing-message');
     const batchProgress = document.getElementById('batch-progress');
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
-    
+
     if (processingIndicator) {
         processingIndicator.style.display = 'block';
     }
@@ -475,29 +475,29 @@ async function handleBatchUpload(files) {
     if (progressFill) {
         progressFill.style.width = '0%';
     }
-        if (progressText) {
-            progressText.textContent = `0 / ${validFiles.length} files processed`;
-        }
-    
+    if (progressText) {
+        progressText.textContent = `0 / ${validFiles.length} files processed`;
+    }
+
     // Hide batch results container
     const batchResultsContainer = document.getElementById('batch-results-container');
     if (batchResultsContainer) {
         batchResultsContainer.style.display = 'none';
     }
-    
+
     try {
         // Prepare FormData with all files
         const formData = new FormData();
         validFiles.forEach(file => {
             formData.append('files', file);
         });
-        
+
         // Upload files
         const response = await fetch(`${API_BASE_URL}/api/upload/batch`, {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) {
             let errorMessage = 'Batch upload failed';
             try {
@@ -508,9 +508,9 @@ async function handleBatchUpload(files) {
             }
             throw new Error(errorMessage);
         }
-        
+
         const result = await response.json();
-        
+
         // Update progress to 100%
         if (progressFill) {
             progressFill.style.width = '100%';
@@ -518,27 +518,27 @@ async function handleBatchUpload(files) {
         if (progressText) {
             progressText.textContent = `${result.successful} / ${result.total_files} files processed successfully`;
         }
-        
+
         // Display batch results
         displayBatchResults(result, validFiles);
-        
+
         // Hide processing indicator after a short delay
         setTimeout(() => {
             if (processingIndicator) {
                 processingIndicator.style.display = 'none';
             }
         }, 1000);
-        
+
         // Reload dashboard stats
         loadDashboardStats();
-        
+
     } catch (error) {
         console.error('Error in batch upload:', error);
-        
+
         if (processingIndicator) {
             processingIndicator.style.display = 'none';
         }
-        
+
         alert(`Batch upload error: ${error.message || 'Unknown error occurred'}`);
     }
 }
@@ -547,12 +547,12 @@ function displayBatchResults(result, files) {
     const batchResultsContainer = document.getElementById('batch-results-container');
     const batchResultsSummary = document.getElementById('batch-results-summary');
     const batchResultsList = document.getElementById('batch-results-list');
-    
+
     if (!batchResultsContainer || !batchResultsSummary || !batchResultsList) {
         console.error('Batch results elements not found');
         return;
     }
-    
+
     // Store batch results in state for navigation
     batchResultsData = {
         result: result,
@@ -560,15 +560,15 @@ function displayBatchResults(result, files) {
         timestamp: Date.now()
     };
     isViewingFromBatch = false; // We're viewing batch results, not individual result
-    
+
     // Show container
     batchResultsContainer.style.display = 'block';
-    
+
     // Create summary
-    const successRate = result.total_files > 0 
-        ? ((result.successful / result.total_files) * 100).toFixed(1) 
+    const successRate = result.total_files > 0
+        ? ((result.successful / result.total_files) * 100).toFixed(1)
         : 0;
-    
+
     batchResultsSummary.innerHTML = `
         <div class="batch-summary-stats">
             <div class="summary-stat">
@@ -589,26 +589,26 @@ function displayBatchResults(result, files) {
             </div>
         </div>
     `;
-    
+
     // Create results list
     batchResultsList.innerHTML = '';
-    
+
     // Show successful results
     if (result.results && result.results.length > 0) {
         const successSection = document.createElement('div');
         successSection.className = 'batch-results-section';
         successSection.innerHTML = '<h4 class="results-section-title">✓ Successfully Processed</h4>';
-        
+
         const successList = document.createElement('div');
         successList.className = 'results-items';
-        
+
         result.results.forEach((item, index) => {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item success';
             const validationResult = item.validation_result || {};
             const score = validationResult.score || 0;
             const scoreClass = score >= 80 ? 'high' : score >= 60 ? 'medium' : 'low';
-            
+
             resultItem.innerHTML = `
                 <div class="result-item-header">
                     <span class="result-filename">${item.filename || 'Unknown'}</span>
@@ -620,20 +620,20 @@ function displayBatchResults(result, files) {
                     <span>Amount: ${validationResult.extracted_data?.total_amount || 'N/A'}</span>
                 </div>
             `;
-            
+
             // Add click handler to view details
             resultItem.addEventListener('click', async () => {
                 if (item.validation_result) {
                     // Mark that we're viewing from batch results
                     isViewingFromBatch = true;
-                    
+
                     currentInvoiceData = {
                         success: true,
                         invoice_id: item.invoice_id,
                         validation_result: item.validation_result,
                         message: 'Invoice processed successfully'
                     };
-                    
+
                     // Try to fetch stored file if invoice_id exists
                     let showPreview = false;
                     if (item.invoice_id) {
@@ -649,31 +649,31 @@ function displayBatchResults(result, files) {
                             console.warn('Could not load file for preview:', fileError);
                         }
                     }
-                    
+
                     // Mark that we're viewing from batch results
                     isViewingFromBatch = true;
-                    
+
                     displayResults(currentInvoiceData, item.filename || 'file', showPreview);
                     navigateToPage('results');
                 }
             });
-            
+
             successList.appendChild(resultItem);
         });
-        
+
         successSection.appendChild(successList);
         batchResultsList.appendChild(successSection);
     }
-    
+
     // Show errors
     if (result.errors && result.errors.length > 0) {
         const errorSection = document.createElement('div');
         errorSection.className = 'batch-results-section';
         errorSection.innerHTML = '<h4 class="results-section-title error">✗ Failed to Process</h4>';
-        
+
         const errorList = document.createElement('div');
         errorList.className = 'results-items';
-        
+
         result.errors.forEach(error => {
             const errorItem = document.createElement('div');
             errorItem.className = 'result-item error';
@@ -687,11 +687,11 @@ function displayBatchResults(result, files) {
             `;
             errorList.appendChild(errorItem);
         });
-        
+
         errorSection.appendChild(errorList);
         batchResultsList.appendChild(errorSection);
     }
-    
+
     // Scroll to results
     batchResultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -729,7 +729,7 @@ function displayResults(data, filename, showPreview = true) {
         const docxPreview = document.getElementById('docx-preview');
         const pdfPlaceholder = document.getElementById('pdf-preview-placeholder');
         const previewNavigation = document.getElementById('preview-navigation');
-        
+
         if (pdfPreview) pdfPreview.style.display = 'none';
         if (pdfCanvas) pdfCanvas.style.display = 'none';
         if (imagePreview) imagePreview.style.display = 'none';
@@ -835,7 +835,7 @@ function initializePreviewControls() {
     const zoomOutBtn = document.getElementById('zoom-out-btn');
     const fitWidthBtn = document.getElementById('fit-width-btn');
     const fitPageBtn = document.getElementById('fit-page-btn');
-    
+
     if (zoomInBtn) {
         zoomInBtn.addEventListener('click', () => adjustZoom(0.25));
     }
@@ -848,12 +848,12 @@ function initializePreviewControls() {
     if (fitPageBtn) {
         fitPageBtn.addEventListener('click', () => fitToPage());
     }
-    
+
     // Navigation controls
     const prevPageBtn = document.getElementById('prev-page-btn');
     const nextPageBtn = document.getElementById('next-page-btn');
     const pageInput = document.getElementById('page-input');
-    
+
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
     }
@@ -870,11 +870,11 @@ function initializePreviewControls() {
             }
         });
     }
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        
+
         if (e.key === 'ArrowLeft' && e.ctrlKey) {
             e.preventDefault();
             goToPage(currentPage - 1);
@@ -902,7 +902,7 @@ async function displayPdfPreview(file) {
 
     const fileName = file.name.toLowerCase();
     currentPdfFile = file;
-    
+
     // Determine file type
     if (fileName.endsWith('.pdf')) {
         currentFileType = 'pdf';
@@ -926,7 +926,7 @@ async function displayPDF(file) {
     const pdfPlaceholder = document.getElementById('pdf-preview-placeholder');
     const previewLoading = document.getElementById('preview-loading');
     const previewNavigation = document.getElementById('preview-navigation');
-    
+
     if (!pdfCanvas || !pdfPlaceholder) {
         console.warn('PDF preview elements not found');
         return;
@@ -945,32 +945,32 @@ async function displayPDF(file) {
         pdfPreview.style.display = 'none';
         pdfCanvas.style.display = 'none';
         if (previewLoading) previewLoading.style.display = 'flex';
-        
+
         // Cancel any ongoing render task
         if (renderTask) {
             renderTask.cancel();
         }
-        
+
         // Load PDF using PDF.js
         const arrayBuffer = await file.arrayBuffer();
         pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         totalPages = pdfDoc.numPages;
         currentPage = 1;
         currentZoom = 1.0;
-        
+
         // Update UI
         updatePageInfo();
         if (previewNavigation) {
             previewNavigation.style.display = 'flex';
         }
-        
+
         // Render first page
         await renderPDFPage(currentPage);
-        
+
         // Hide loading, show canvas
         if (previewLoading) previewLoading.style.display = 'none';
         pdfCanvas.style.display = 'block';
-        
+
     } catch (error) {
         console.error('Error displaying PDF preview:', error);
         if (previewLoading) previewLoading.style.display = 'none';
@@ -987,46 +987,46 @@ async function displayPDF(file) {
 
 async function renderPDFPage(pageNum) {
     if (!pdfDoc || pageNum < 1 || pageNum > totalPages) return;
-    
+
     const pdfCanvas = document.getElementById('pdf-canvas');
     const previewLoading = document.getElementById('preview-loading');
-    
+
     if (!pdfCanvas) return;
-    
+
     try {
         // Cancel any ongoing render task
         if (renderTask) {
             renderTask.cancel();
         }
-        
+
         // Show loading for page changes
         if (pageNum !== currentPage && previewLoading) {
             previewLoading.style.display = 'flex';
         }
-        
+
         const page = await pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: currentZoom });
-        
+
         // Set canvas dimensions
         pdfCanvas.height = viewport.height;
         pdfCanvas.width = viewport.width;
-        
+
         const context = pdfCanvas.getContext('2d');
-        
+
         // Render page
         renderTask = page.render({
             canvasContext: context,
             viewport: viewport
         });
-        
+
         await renderTask.promise;
         currentPage = pageNum;
-        
+
         // Update UI
         updatePageInfo();
         if (previewLoading) previewLoading.style.display = 'none';
         pdfCanvas.style.display = 'block';
-        
+
     } catch (error) {
         if (error.name !== 'RenderingCancelledException') {
             console.error('Error rendering PDF page:', error);
@@ -1040,7 +1040,7 @@ function displayImage(file) {
     const pdfPlaceholder = document.getElementById('pdf-preview-placeholder');
     const previewLoading = document.getElementById('preview-loading');
     const previewNavigation = document.getElementById('preview-navigation');
-    
+
     if (!imagePreview || !pdfPlaceholder) {
         console.warn('Image preview elements not found');
         return;
@@ -1053,10 +1053,10 @@ function displayImage(file) {
         document.getElementById('pdf-preview').style.display = 'none';
         document.getElementById('docx-preview').style.display = 'none';
         if (previewNavigation) previewNavigation.style.display = 'none';
-        
+
         // Show loading
         if (previewLoading) previewLoading.style.display = 'flex';
-        
+
         const imageUrl = URL.createObjectURL(file);
         imagePreview.onload = () => {
             if (previewLoading) previewLoading.style.display = 'none';
@@ -1074,7 +1074,7 @@ function displayImage(file) {
             pdfPlaceholder.style.display = 'flex';
         };
         imagePreview.src = imageUrl;
-        
+
     } catch (error) {
         console.error('Error displaying image preview:', error);
         if (previewLoading) previewLoading.style.display = 'none';
@@ -1087,7 +1087,7 @@ async function displayDOCX(file) {
     const pdfPlaceholder = document.getElementById('pdf-preview-placeholder');
     const previewLoading = document.getElementById('preview-loading');
     const previewNavigation = document.getElementById('preview-navigation');
-    
+
     if (!docxPreview || !pdfPlaceholder) {
         console.warn('DOCX preview elements not found');
         return;
@@ -1100,22 +1100,22 @@ async function displayDOCX(file) {
         document.getElementById('pdf-preview').style.display = 'none';
         document.getElementById('image-preview').style.display = 'none';
         if (previewNavigation) previewNavigation.style.display = 'none';
-        
+
         // Show loading
         if (previewLoading) previewLoading.style.display = 'flex';
-        
+
         if (typeof mammoth === 'undefined') {
             throw new Error('Mammoth.js library not loaded');
         }
-        
+
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-        
+
         docxPreview.innerHTML = result.value;
-        
+
         if (previewLoading) previewLoading.style.display = 'none';
         docxPreview.style.display = 'block';
-        
+
     } catch (error) {
         console.error('Error displaying DOCX preview:', error);
         if (previewLoading) previewLoading.style.display = 'none';
@@ -1128,7 +1128,7 @@ function displayGenericPreview(file) {
     const pdfPlaceholder = document.getElementById('pdf-preview-placeholder');
     const previewLoading = document.getElementById('preview-loading');
     const previewNavigation = document.getElementById('preview-navigation');
-    
+
     if (!pdfPreview || !pdfPlaceholder) {
         console.warn('Preview elements not found');
         return;
@@ -1141,11 +1141,11 @@ function displayGenericPreview(file) {
         document.getElementById('image-preview').style.display = 'none';
         document.getElementById('docx-preview').style.display = 'none';
         if (previewNavigation) previewNavigation.style.display = 'none';
-        
+
         const fileUrl = URL.createObjectURL(file);
         pdfPreview.src = fileUrl;
         pdfPreview.style.display = 'block';
-        
+
     } catch (error) {
         console.error('Error displaying generic preview:', error);
         pdfPlaceholder.style.display = 'flex';
@@ -1251,7 +1251,7 @@ function updatePageInfo() {
     const pageInput = document.getElementById('page-input');
     const prevBtn = document.getElementById('prev-page-btn');
     const nextBtn = document.getElementById('next-page-btn');
-    
+
     if (currentFileType === 'pdf') {
         if (pageInfo) {
             pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
@@ -1289,7 +1289,7 @@ function initializeTabs() {
         // Tabs might not exist on all pages, that's okay
         return;
     }
-    
+
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             tabButtons.forEach(btn => {
@@ -1430,11 +1430,11 @@ async function viewInvoice(invoiceId) {
 
         currentInvoiceData = mockResult;
         isViewingFromBatch = false; // Viewing from invoice list, not batch
-        
+
         // Try to fetch and display the stored file
         const filename = invoice.file_name || `${invoice.invoice_number || 'invoice'}.pdf`;
         let showPreview = false;
-        
+
         if (invoice.file_id) {
             try {
                 const fileResponse = await fetch(`${API_BASE_URL}/api/invoices/${invoiceId}/file`);
@@ -1449,7 +1449,7 @@ async function viewInvoice(invoiceId) {
                 // Continue without file preview
             }
         }
-        
+
         displayResults(mockResult, filename, showPreview);
         navigateToPage('results');
     } catch (error) {
@@ -1487,16 +1487,16 @@ async function deleteInvoice(invoiceId, invoiceNumber) {
         }
 
         const result = await response.json().catch(() => ({ success: true }));
-        
+
         // Show success message
         alert(`Invoice "${invoiceNumber}" has been deleted successfully.`);
-        
+
         // Reload invoices list
         loadInvoices();
-        
+
         // Reload dashboard stats
         loadDashboardStats();
-        
+
     } catch (error) {
         console.error('Error deleting invoice:', error);
         console.error('Full error details:', {

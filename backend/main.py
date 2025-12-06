@@ -124,8 +124,8 @@ async def extract_dual_source(file: UploadFile = File(...)):
         if temp_file_path and os.path.exists(temp_file_path):
             try:
                 os.unlink(temp_file_path)
-            except:
-                pass
+            except OSError as e:
+                logger.warning(f"Failed to delete temp file {temp_file_path}: {e}")
 
 
 @app.post("/api/extract-document-ai")
@@ -220,8 +220,8 @@ async def extract_document_ai(file: UploadFile = File(...)):
         if temp_file_path and os.path.exists(temp_file_path):
             try:
                 os.unlink(temp_file_path)
-            except:
-                pass
+            except OSError as e:
+                logger.warning(f"Failed to delete temp file {temp_file_path}: {e}")
 
 
 def get_file_type(filename: str) -> str:
@@ -344,12 +344,13 @@ async def upload_and_process(file: UploadFile = File(...)):
         )
 
     except Exception as e:
+        logger.error(f"Error processing file {file.filename}: {str(e)}")
         # Clean up temp file if it still exists
         if temp_file_path and os.path.exists(temp_file_path):
             try:
                 os.unlink(temp_file_path)
-            except:
-                pass
+            except OSError as cleanup_error:
+                logger.warning(f"Failed to delete temp file during error cleanup: {cleanup_error}")
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
 
 @app.post("/api/validate")
@@ -738,8 +739,8 @@ async def process_single_file(file: UploadFile) -> dict:
         if temp_file_path and os.path.exists(temp_file_path):
             try:
                 os.unlink(temp_file_path)
-            except:
-                pass
+            except OSError as e:
+                logger.warning(f"Failed to delete temp file {temp_file_path}: {e}")
 
 @app.post("/api/upload/batch", response_model=BatchProcessResponse)
 async def upload_and_process_batch(files: List[UploadFile] = File(...)):

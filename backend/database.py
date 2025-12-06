@@ -144,7 +144,8 @@ class Database:
                 invoice["id"] = str(invoice.pop("_id"))
                 return invoice
             return None
-        except Exception:
+        except Exception as e:
+            print(f"Error retrieving invoice {invoice_id}: {str(e)}")
             return None
 
     def get_all_invoices(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:

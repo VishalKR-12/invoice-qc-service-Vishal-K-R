@@ -101,7 +101,8 @@ class InvoiceValidator:
                 if days_diff > 365:
                     self.warnings.append(f"Unusually long payment term: {days_diff} days")
                     self.score -= 5
-            except Exception:
+            except (ValueError, TypeError, parser.ParserError) as e:
+                # Date parsing failed, continue without error
                 pass
 
         if invoice.subtotal and invoice.tax_amount and invoice.total_amount:
@@ -150,12 +151,13 @@ class InvoiceValidator:
                 elif days_old > 730:
                     self.warnings.append(f"Invoice is {days_old} days old")
                     self.score -= 3
-            except Exception:
+            except (ValueError, TypeError, parser.ParserError) as e:
+                # Date parsing failed, continue without error
                 pass
 
     def _is_valid_date(self, date_str: str) -> bool:
         try:
             parser.parse(date_str)
             return True
-        except Exception:
+        except (ValueError, TypeError, parser.ParserError):
             return False
