@@ -83,7 +83,7 @@ class ExtractionMerger:
 
     def __init__(self):
         self.pdf_extractor = PDFExtractor()
-        self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Field reliability weights (higher = more reliable if value present)
         self.field_weights = {

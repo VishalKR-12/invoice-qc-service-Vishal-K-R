@@ -35,7 +35,7 @@ python-dateutil==2.9.0.post0
 google-generativeai==0.7.2
 
 # Optional: Google Document AI (uncomment if using)
-# google-cloud-documentai==2.20.0
+google-cloud-documentai==2.20.0
 
 # Optional: OCR support (uncomment if using)
 # pytesseract==0.3.10

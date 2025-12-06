@@ -55,12 +55,13 @@ class PDFExtractor:
         # Initialize Gemini API
         try:
             genai.configure(api_key=GEMINI_API_KEY)
-            self.gemini_text_model = genai.GenerativeModel('gemini-pro')
-            # Try to use vision model if available
+            # Use gemini-2.5-flash (latest model with best performance)
+            self.gemini_text_model = genai.GenerativeModel('gemini-2.5-flash')
+            # Vision is now integrated in gemini-2.5-flash
             try:
-                self.gemini_vision_model = genai.GenerativeModel('gemini-pro-vision')
+                self.gemini_vision_model = genai.GenerativeModel('gemini-2.5-flash')
                 self.vision_available = True
-            except:
+            except Exception:
                 self.gemini_vision_model = None
                 self.vision_available = False
             self.use_gemini = True

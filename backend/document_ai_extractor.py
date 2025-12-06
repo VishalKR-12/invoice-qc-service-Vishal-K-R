@@ -22,10 +22,11 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import logging
+import os
 
 try:
     from google.cloud import documentai_v1 as documentai
-    from google.api_core.gapic_v1 import client_info as grpc_client_info
+    from google.api_core.client_options import ClientOptions
     DOCUMENT_AI_AVAILABLE = True
 except ImportError:
     DOCUMENT_AI_AVAILABLE = False
@@ -112,22 +113,30 @@ class GoogleDocumentAIExtractor:
     """
 
     def __init__(self):
+        # Initialize Gemini with latest model
         genai.configure(api_key=GEMINI_API_KEY)
-        self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
+        self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
         
-        # Document AI project config (would be set from environment)
-        self.project_id = None
-        self.processor_id = None
-        self.location = "us"
+        # Document AI project config from environment
+        self.project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+        self.processor_id = os.getenv("GOOGLE_DOCUMENT_AI_PROCESSOR_ID")
+        self.location = os.getenv("GOOGLE_DOCUMENT_AI_LOCATION", "us")
         
         # Try to initialize Document AI client if credentials available
         self.document_ai_client = None
         if DOCUMENT_AI_AVAILABLE:
             try:
+                credentials = None
+                service_account_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+                if service_account_path and os.path.exists(service_account_path):
+                    from google.oauth2 import service_account
+                    credentials = service_account.Credentials.from_service_account_file(service_account_path)
+
                 self.document_ai_client = documentai.DocumentProcessorServiceClient(
-                    client_options=grpc_client_info.ClientOptions(
+                    client_options=ClientOptions(
                         api_endpoint=f"{self.location}-documentai.googleapis.com"
-                    )
+                    ),
+                    credentials=credentials
                 )
             except Exception as e:
                 logger.warning(f"Document AI client init failed: {str(e)}")

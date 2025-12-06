@@ -11,6 +11,7 @@ from datetime import datetime
 from dataclasses import asdict
 from models import ValidationResult, ProcessResponse, InvoiceSchema, GoogleVerificationResult, MergedExtractionResponse
 from pdf_extractor import PDFExtractor
+from enhanced_pdf_extractor import EnhancedPDFExtractor
 from validator import InvoiceValidator
 from google_verifier import GoogleVerifier
 from extraction_merger import ExtractionMerger
@@ -33,6 +34,7 @@ app.add_middleware(
 
 db = Database()
 extractor = PDFExtractor()
+enhanced_extractor = EnhancedPDFExtractor()  # New enhanced extractor
 validator = InvoiceValidator()
 google_verifier = GoogleVerifier()
 merger = ExtractionMerger()
