@@ -3,7 +3,7 @@
 CLI tool for Invoice Extraction & Quality Control Service
 
 Supports:
-- extract: Extract invoice data from PDF directory
+- extract: Extract invoice data from PDF file or directory
 - validate: Validate extracted JSON invoices
 - full-run: Extract + Validate end-to-end
 """
@@ -13,253 +13,202 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+
+# Import extractors
 from pdf_extractor import PDFExtractor
+from enhanced_pdf_extractor import EnhancedPDFExtractor
+from document_ai_extractor import GoogleDocumentAIExtractor
 from validator import InvoiceValidator
-from models import InvoiceSchema, ValidationResult
+from models import InvoiceSchema
 
+def get_extractor(method: str = "auto"):
+    """
+    Select appropriate extractor based on method and availability.
+    Returns tuple (extractor_instance, method_name)
+    """
+    doc_ai = GoogleDocumentAIExtractor()
+    gemini = EnhancedPDFExtractor()
+    local_pdf = PDFExtractor()
 
-def extract_from_directory(pdf_dir: str, output_file: str) -> None:
-    """Extract invoice data from all PDFs in a directory"""
-    pdf_dir_path = Path(pdf_dir)
-    if not pdf_dir_path.exists():
-        print(f"Error: Directory '{pdf_dir}' does not exist")
-        sys.exit(1)
-    
-    if not pdf_dir_path.is_dir():
-        print(f"Error: '{pdf_dir}' is not a directory")
-        sys.exit(1)
-    
-    # Find all PDF files
-    pdf_files = list(pdf_dir_path.glob("*.pdf"))
-    if not pdf_files:
-        print(f"Warning: No PDF files found in '{pdf_dir}'")
-        sys.exit(1)
-    
-    print(f"Found {len(pdf_files)} PDF file(s)")
-    print("=" * 60)
-    
-    extractor = PDFExtractor()
-    extracted_invoices = []
-    
-    for i, pdf_file in enumerate(pdf_files, 1):
-        print(f"\n[{i}/{len(pdf_files)}] Processing: {pdf_file.name}")
-        try:
-            invoice_data = extractor.extract_from_pdf(str(pdf_file))
-            # Convert to dict for JSON serialization
-            invoice_dict = invoice_data.dict()
-            # Add source file info
-            invoice_dict["source_file"] = pdf_file.name
-            extracted_invoices.append(invoice_dict)
-            print(f"  ✓ Extracted: Invoice #{invoice_data.invoice_number or 'N/A'}")
-        except Exception as e:
-            print(f"  ✗ Error extracting from {pdf_file.name}: {str(e)}")
-            continue
-    
-    # Write output
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(extracted_invoices, f, indent=2, ensure_ascii=False)
-    
-    print("\n" + "=" * 60)
-    print(f"✓ Extraction complete!")
-    print(f"  Total processed: {len(extracted_invoices)}/{len(pdf_files)}")
-    print(f"  Output saved to: {output_path.absolute()}")
+    if method == "auto":
+        # Priority 1: Document AI (Premium + Enabled)
+        if doc_ai.is_enabled:
+            return doc_ai, "google_document_ai"
+        
+        # Priority 2: Gemini
+        if gemini.gemini_available:
+            return gemini, "gemini_extraction"
+            
+        # Priority 3: Local regex
+        return local_pdf, "pdf_extractor"
 
+    elif method == "google_document_ai":
+        if not doc_ai.is_enabled:
+            print("Error: Google Document AI is a premium feature and is currently disabled.")
+            sys.exit(1)
+        return doc_ai, "google_document_ai"
 
-def validate_json(input_file: str, report_file: str = None) -> None:
-    """Validate invoices from JSON file"""
-    input_path = Path(input_file)
-    if not input_path.exists():
-        print(f"Error: File '{input_file}' does not exist")
-        sys.exit(1)
+    elif method == "gemini_extraction":
+        return gemini, "gemini_extraction"
     
-    # Read JSON file
-    try:
-        with open(input_path, 'r', encoding='utf-8') as f:
-            invoices_data = json.load(f)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in '{input_file}': {str(e)}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error reading file: {str(e)}")
-        sys.exit(1)
+    elif method == "pdf_extractor":
+        return local_pdf, "pdf_extractor"
     
-    if not isinstance(invoices_data, list):
-        print("Error: JSON file must contain an array of invoices")
-        sys.exit(1)
-    
-    print(f"Validating {len(invoices_data)} invoice(s)...")
-    print("=" * 60)
-    
-    validator = InvoiceValidator()
-    validation_results = []
-    error_counts = {}
-    
-    for i, invoice_data in enumerate(invoices_data, 1):
-        try:
-            # Create InvoiceSchema from dict
-            invoice = InvoiceSchema(**invoice_data)
-            # Validate
-            result = validator.validate(invoice)
-            
-            # Convert to dict for JSON serialization
-            result_dict = result.dict()
-            validation_results.append(result_dict)
-            
-            # Count errors
-            for error in result.errors:
-                error_counts[error] = error_counts.get(error, 0) + 1
-            
-            status = "✓ VALID" if result.is_valid else "✗ INVALID"
-            print(f"[{i}/{len(invoices_data)}] {status} - Invoice #{result.invoice_number or 'N/A'} (Score: {result.score})")
-            
-            if result.errors:
-                for error in result.errors:
-                    print(f"    Error: {error}")
-            if result.warnings:
-                for warning in result.warnings:
-                    print(f"    Warning: {warning}")
-        
-        except Exception as e:
-            print(f"[{i}/{len(invoices_data)}] ✗ Error processing invoice: {str(e)}")
-            continue
-    
-    # Calculate summary
-    total_invoices = len(validation_results)
-    valid_invoices = sum(1 for r in validation_results if r.get("is_valid", False))
-    invalid_invoices = total_invoices - valid_invoices
-    
-    # Print summary
-    print("\n" + "=" * 60)
-    print("VALIDATION SUMMARY")
-    print("=" * 60)
-    print(f"Total invoices: {total_invoices}")
-    print(f"Valid: {valid_invoices} ({valid_invoices/total_invoices*100:.1f}%)" if total_invoices > 0 else "Valid: 0")
-    print(f"Invalid: {invalid_invoices} ({invalid_invoices/total_invoices*100:.1f}%)" if total_invoices > 0 else "Invalid: 0")
-    
-    if error_counts:
-        print("\nTop Error Types:")
-        sorted_errors = sorted(error_counts.items(), key=lambda x: x[1], reverse=True)
-        for error, count in sorted_errors[:5]:
-            print(f"  - {error}: {count} occurrence(s)")
-    
-    # Create summary object
-    summary = {
-        "total_invoices": total_invoices,
-        "valid_invoices": valid_invoices,
-        "invalid_invoices": invalid_invoices,
-        "error_counts": error_counts
-    }
-    
-    # Write report if specified
-    if report_file:
-        report_path = Path(report_file)
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        report_data = {
-            "summary": summary,
-            "results": validation_results
-        }
-        
-        with open(report_path, 'w', encoding='utf-8') as f:
-            json.dump(report_data, f, indent=2, ensure_ascii=False)
-        
-        print(f"\n✓ Report saved to: {report_path.absolute()}")
-    
-    # Exit with non-zero code if there are invalid invoices
-    if invalid_invoices > 0:
-        print(f"\n⚠ {invalid_invoices} invalid invoice(s) found")
-        sys.exit(1)
     else:
-        print("\n✓ All invoices are valid!")
-        sys.exit(0)
+        print(f"Warning: Unknown method '{method}'. Falling back to auto.")
+        return get_extractor("auto")
 
-
-def full_run(pdf_dir: str, report_file: str) -> None:
-    """Extract from PDFs and validate in one step"""
-    import tempfile
-    
-    print("=" * 60)
-    print("FULL RUN: Extract + Validate")
-    print("=" * 60)
-    
-    # Create temporary file for extracted data
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_file:
-        tmp_extracted_file = tmp_file.name
-    
+def process_file(extractor, file_path: Path) -> Optional[Dict]:
+    """Process a single file with the given extractor"""
     try:
-        # Step 1: Extract
-        print("\n[STEP 1/2] Extracting invoice data from PDFs...")
-        extract_from_directory(pdf_dir, tmp_extracted_file)
+        if isinstance(extractor, GoogleDocumentAIExtractor):
+            result = extractor.extract_from_pdf(str(file_path))
+            return result.to_dict() if result else None
+            
+        # Generalized handling for other extractors
+        result = extractor.extract_from_pdf(str(file_path))
         
-        # Step 2: Validate
-        print("\n[STEP 2/2] Validating extracted invoices...")
-        validate_json(tmp_extracted_file, report_file)
-    
-    finally:
-        # Clean up temporary file
-        if os.path.exists(tmp_extracted_file):
-            os.unlink(tmp_extracted_file)
+        # Convert Pydantic models to dict
+        if hasattr(result, 'dict'):
+             return result.dict()
+        elif hasattr(result, 'to_dict'):
+             return result.to_dict()
+        elif isinstance(result, dict):
+             return result
+        else:
+             print(f"Warning: Unknown return type {type(result)} from extractor")
+             return None
+             
+    except Exception as e:
+        print(f"Extraction failed for {file_path.name}: {e}")
+        return None
 
+def extract_command(args):
+    """Handle extract command"""
+    input_path = Path(args.input)
+    output_path = Path(args.output) if args.output else None
+    
+    if not input_path.exists():
+        print(f"Error: Path '{input_path}' not found.")
+        sys.exit(1)
+
+    # Initialize extractor
+    extractor, method_name = get_extractor(args.method)
+    print(f"Using Extraction Method: {method_name}")
+
+    results = []
+
+    if input_path.is_file():
+        print(f"Processing single file: {input_path.name}")
+        data = process_file(extractor, input_path)
+        if data:
+            data['source_file'] = input_path.name
+            results.append(data)
+            # Print to stdout if no output file
+            if not output_path:
+                print(json.dumps(data, indent=2, default=str))
+
+    elif input_path.is_dir():
+        pdf_files = list(input_path.glob("*.pdf"))
+        print(f"Found {len(pdf_files)} PDF files in directory.")
+        
+        for p in pdf_files:
+            print(f"Processing {p.name}...")
+            data = process_file(extractor, p)
+            if data:
+                data['source_file'] = p.name
+                results.append(data)
+
+    # Save to file if requested
+    if output_path and results:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2, default=str)
+        print(f"Results saved to {output_path}")
+
+def validate_command(args):
+    """Handle validate command"""
+    input_file = args.input
+    if not os.path.exists(input_file):
+        print(f"File not found: {input_file}")
+        sys.exit(1)
+
+    try:
+        with open(input_file, 'r') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"Error reading JSON: {e}")
+        sys.exit(1)
+    
+    if not isinstance(data, list):
+         data = [data]
+
+    validator = InvoiceValidator()
+    valid_count = 0
+    results = []
+    
+    print(f"Validating {len(data)} invoice(s)...")
+    print("=" * 60)
+
+    for i, item in enumerate(data, 1):
+        try:
+            # Clean up metadata if present
+            invoice_data = {k:v for k,v in item.items() if k not in ['source_file', 'extraction_metadata']}
+            
+            invoice = InvoiceSchema(**invoice_data)
+            res = validator.validate(invoice)
+            
+            status = "✓ VALID" if res.is_valid else "✗ INVALID"
+            print(f"[{i}] Invoice #{invoice.invoice_number or 'N/A'}: {status} (Score: {res.score})")
+            
+            if not res.is_valid:
+                for err in res.errors:
+                    print(f"    - {err}")
+
+            if res.is_valid: valid_count += 1
+            if args.report:
+                results.append(res.dict())
+        except Exception as e:
+            print(f"[{i}] Validation error: {e}")
+
+    print("=" * 60)
+    print(f"Summary: {valid_count}/{len(data)} valid.")
+    
+    if args.report:
+        with open(args.report, 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+        print(f"Report saved to {args.report}")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Invoice Extraction & Quality Control CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Extract invoice data from PDFs
-  python cli.py extract --pdf-dir ./invoices --output extracted.json
-  
-  # Validate extracted JSON
-  python cli.py validate --input extracted.json --report validation_report.json
-  
-  # Extract and validate in one step
-  python cli.py full-run --pdf-dir ./invoices --report final_report.json
-        """
-    )
-    
-    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
-    
-    # Extract command
-    extract_parser = subparsers.add_parser('extract', help='Extract invoice data from PDF directory')
-    extract_parser.add_argument('--pdf-dir', required=True, help='Directory containing PDF files')
-    extract_parser.add_argument('--output', required=True, help='Output JSON file path')
-    
-    # Validate command
-    validate_parser = subparsers.add_parser('validate', help='Validate extracted JSON invoices')
-    validate_parser.add_argument('--input', required=True, help='Input JSON file with invoices')
-    validate_parser.add_argument('--report', help='Output validation report JSON file (optional)')
-    
-    # Full-run command
-    fullrun_parser = subparsers.add_parser('full-run', help='Extract and validate end-to-end')
-    fullrun_parser.add_argument('--pdf-dir', required=True, help='Directory containing PDF files')
-    fullrun_parser.add_argument('--report', required=True, help='Output validation report JSON file')
-    
-    args = parser.parse_args()
-    
-    if not args.command:
-        parser.print_help()
-        sys.exit(1)
-    
-    try:
-        if args.command == 'extract':
-            extract_from_directory(args.pdf_dir, args.output)
-        elif args.command == 'validate':
-            validate_json(args.input, args.report)
-        elif args.command == 'full-run':
-            full_run(args.pdf_dir, args.report)
-    except KeyboardInterrupt:
-        print("\n\nOperation cancelled by user")
-        sys.exit(130)
-    except Exception as e:
-        print(f"\nError: {str(e)}")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Invoice Extraction CLI")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
+    # Extract
+    extract_parser = subparsers.add_parser("extract", help="Extract data from PDF(s)")
+    extract_parser.add_argument("input", help="Input PDF file or directory")
+    extract_parser.add_argument("--output", help="Output JSON file (optional)")
+    extract_parser.add_argument("--method", choices=["auto", "google_document_ai", "gemini_extraction", "pdf_extractor"], default="auto", help="Extraction method")
+    extract_parser.set_defaults(func=extract_command)
+
+    # Validate
+    validate_parser = subparsers.add_parser("validate", help="Validate JSON output")
+    validate_parser.add_argument("input", help="Input JSON file")
+    validate_parser.add_argument("--report", help="Output validation report JSON")
+    validate_parser.set_defaults(func=validate_command)
+    
+    # Legacy Batch Support with --pdf-dir
+    batch_parser = subparsers.add_parser("process-batch", help="Legacy batch processing")
+    batch_parser.add_argument("--pdf-dir", required=True)
+    batch_parser.add_argument("--output", required=True)
+    batch_parser.set_defaults(func=lambda args: extract_command(argparse.Namespace(input=args.pdf_dir, output=args.output, method="auto")))
+
+    args = parser.parse_args()
+    if hasattr(args, 'func'):
+        args.func(args)
+    else:
+        parser.print_help()
 
 if __name__ == "__main__":
     main()
-
