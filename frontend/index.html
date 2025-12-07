@@ -499,149 +499,97 @@
                         </div>
 
                         <div class="doc-section">
-                            <h3>Extracted Invoice Fields (12 Fields)</h3>
+                            <h3>Hybrid AI Architecture</h3>
+                            <p>This service uses a multi-layered "Hybrid AI" approach to ensure the highest possible
+                                extraction accuracy:</p>
                             <ul class="doc-list">
-                                <li><strong>Invoice Number</strong> - Unique identifier for tracking</li>
-                                <li><strong>Vendor Name</strong> - Name of the seller/vendor</li>
-                                <li><strong>Buyer Name</strong> - Name of the buyer/customer</li>
-                                <li><strong>Invoice Date</strong> - Date invoice was issued</li>
-                                <li><strong>Due Date</strong> - Payment due date</li>
-                                <li><strong>Vendor Address</strong> - Complete vendor address</li>
-                                <li><strong>Buyer Address</strong> - Complete buyer address</li>
-                                <li><strong>Currency</strong> - Currency code (USD, EUR, GBP, etc.)</li>
-                                <li><strong>Subtotal</strong> - Amount before tax</li>
-                                <li><strong>Tax Amount</strong> - Tax/VAT amount</li>
-                                <li><strong>Total Amount</strong> - Final invoice amount</li>
-                                <li><strong>Payment Terms</strong> - Payment terms description</li>
+                                <li><strong>1. Google Document AI (Primary):</strong> Uses the specialized
+                                    `pretrained-invoice-v1.3` model for high-fidelity extraction of tabular data and
+                                    entities.</li>
+                                <li><strong>2. Gemini 2.5 Flash (Fallback):</strong> A multimodal model that "reads" the
+                                    document visually to capture messy layouts, handwritten notes, or images that
+                                    standard OCR misses.</li>
+                                <li><strong>3. Regex Extractor (Backup):</strong> A fast, rule-based fallback for simple
+                                    text-based PDFs when AI services are unavailable.</li>
                             </ul>
                         </div>
 
                         <div class="doc-section">
-                            <h3>Validation Rules (14+ Rules)</h3>
-                            <p><strong>Completeness Rules:</strong> Ensures invoice number, vendor name, total amount,
-                                and invoice date are present.</p>
-                            <p><strong>Format Validation:</strong> Validates date formats, amount types, currency codes,
-                                and invoice number length.</p>
-                            <p><strong>Business Logic:</strong> Checks that due dates are after invoice dates, amounts
-                                calculate correctly (subtotal + tax = total), and payment terms are reasonable.</p>
-                            <p><strong>Anomaly Detection:</strong> Flags unusual patterns like duplicate vendors/buyers,
-                                extremely high amounts, very old invoices, or future-dated invoices.</p>
+                            <h3>Extraction Modes</h3>
+                            <p>You can choose your preferred engine during upload:</p>
+                            <ul class="doc-list">
+                                <li><strong>🧠 Auto (Recommended):</strong> Automatically attempts Document AI first,
+                                    falls back to Gemini, then to Regex.</li>
+                                <li><strong>🧾 Google Document AI:</strong> Forces the use of Google's specialized
+                                    Invoice Processor.</li>
+                                <li><strong>👁️‍🗨️ Gemini Vision:</strong> Uses Gemini 1.5/2.5 Pro Vision for a
+                                    generative approach.</li>
+                                <li><strong>📄 PDF Extractor:</strong> Runs essentially offline using regex patterns
+                                    (fastest, but less accurate).</li>
+                            </ul>
                         </div>
 
                         <div class="doc-section">
-                            <h3>Validation Scoring System</h3>
+                            <h3>Extracted Invoice Fields (10+ Fields)</h3>
                             <ul class="doc-list">
-                                <li><strong>Starting Score:</strong> 100 points</li>
-                                <li><strong>Valid Invoice:</strong> Score ≥ 80 (can be processed automatically)</li>
-                                <li><strong>Review Recommended:</strong> Score 60-79 (warning level)</li>
-                                <li><strong>Invalid Invoice:</strong> Score &lt; 60 (requires correction)</li>
+                                <li><strong>Invoice Number</strong> - Unique identifier for tracking</li>
+                                <li><strong>Vendor Name</strong> - Name of the seller/vendor</li>
+                                <li><strong>Invoice Date</strong> - Date invoice was issued</li>
+                                <li><strong>Due Date</strong> - Payment due date</li>
+                                <li><strong>Total Amount</strong> - Final invoice amount</li>
+                                <li><strong>Tax Amount</strong> - Tax/VAT amount</li>
+                                <li><strong>Subtotal</strong> - Amount before tax</li>
+                                <li><strong>Currency</strong> - Currency code (USD, EUR, etc.)</li>
+                                <li><strong>Payment Terms</strong> - Payment conditions</li>
+                                <li><strong>Line Items</strong> - Detailed table of purchased items</li>
+                            </ul>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>Validation Rules</h3>
+                            <p><strong>Completeness:</strong> Checks for Invoice Number, Date, Vendor, and Total.</p>
+                            <p><strong>Arithmetic:</strong> Ensures `Subtotal + Tax ≈ Total Amount` within a small
+                                tolerance.</p>
+                            <p><strong>Logic:</strong> verifying `Due Date` >= `Invoice Date`.</p>
+                            <p><strong>Validation Score:</strong></p>
+                            <ul>
+                                <li><span class="status-badge-valid">Score ≥ 80</span>: High confidence (Valid)</li>
+                                <li><span class="status-badge-invalid">Score < 80</span>: Review recommended</li>
                             </ul>
                         </div>
 
                         <div class="doc-section">
                             <h3>How to Use</h3>
-                            <p><strong>Via Web UI (This Application):</strong></p>
+                            <p><strong>Via Web UI:</strong></p>
                             <ul class="doc-list">
-                                <li>Navigate to <strong>Dashboard</strong> to view statistics</li>
-                                <li>Go to <strong>Upload & Process</strong> to upload PDF invoices (single or batch)
-                                </li>
-                                <li>View <strong>Extraction Results</strong> with validation score and extracted data
-                                </li>
-                                <li>Browse <strong>All Invoices</strong> to manage processed documents</li>
+                                <li>Go to <strong>Upload</strong> and select your <strong>Extraction Mode</strong>.</li>
+                                <li>Drag & Drop a PDF invoice.</li>
+                                <li>Review the extracted data and validation score immediately.</li>
                             </ul>
-                            <p><strong>Via API:</strong> Full REST API available at
-                                <code>http://localhost:8000/docs</code> with endpoints for upload, validation, and
-                                invoice management.
-                            </p>
-                            <p><strong>Via CLI:</strong> Command-line tools for batch extraction and validation:</p>
+                            <p><strong>Via API:</strong> Full Swagger docs at <code>/docs</code>.</p>
+                            <p><strong>Via CLI:</strong></p>
                             <ul class="doc-list">
-                                <li><code>python cli.py extract --pdf-dir ./invoices --output extracted.json</code></li>
-                                <li><code>python cli.py validate --input extracted.json --report report.json</code></li>
-                                <li><code>python cli.py full-run --pdf-dir ./invoices --report report.json</code></li>
-                            </ul>
-                        </div>
-
-                        <div class="doc-section">
-                            <h3>Supported File Types</h3>
-                            <ul class="doc-list">
-                                <li><strong>PDF</strong> - Portable Document Format (text-based or scanned with OCR
-                                    setup)</li>
-                                <li><strong>Supported PDF Types</strong>:
-                                    <ul>
-                                        <li>Text-based PDFs - Direct text extraction using pdfplumber</li>
-                                        <li>Scanned PDFs - Requires Tesseract OCR setup (supports English and German)
-                                        </li>
-                                    </ul>
+                                <li><code>python backend/cli.py extract "invoice.pdf" --method auto</code></li>
+                                <li><code>python backend/cli.py process-batch "./folder" --output results.json</code>
                                 </li>
                             </ul>
                         </div>
 
                         <div class="doc-section">
-                            <h3>File Limits</h3>
+                            <h3>AI Usage Guidelines</h3>
+                            <p>This project was built with the assistance of <strong>Google DeepMind /
+                                    Antigravity</strong>.</p>
+                            <p><strong>AI Contributions:</strong></p>
                             <ul class="doc-list">
-                                <li><strong>Single File:</strong> Max 35MB</li>
-                                <li><strong>Batch Upload:</strong> Max 50 files per batch</li>
-                                <li><strong>Pages:</strong> Up to 5 pages recommended for optimal performance</li>
+                                <li>Scaffolding structure (FastAPI, Vanilla JS).</li>
+                                <li>Hybrid Extraction Logic (DocAI + Gemini).</li>
+                                <li>Regex pattern generation.</li>
                             </ul>
+                            <p><strong>Manual Human Review:</strong> Critical logic and UI UX corrections (e.g., Dark
+                                Mode specificities) were handled manually.</p>
                         </div>
 
-                        <div class="doc-section">
-                            <h3>Language Support</h3>
-                            <p>Currently optimized for <strong>English and German</strong> invoices with automatic
-                                language detection.</p>
-                        </div>
 
-                        <div class="doc-section">
-                            <h3>Theme & Accessibility</h3>
-                            <p>The application features a <strong>pitch-black dark theme</strong> with:</p>
-                            <ul class="doc-list">
-                                <li>Toggle button in top-right header (sun/moon icon)</li>
-                                <li>WCAG AA compliant contrast ratios</li>
-                                <li>Automatic theme persistence in browser localStorage</li>
-                                <li>Reduced motion support for accessibility</li>
-                            </ul>
-                        </div>
-
-                        <div class="doc-section">
-                            <h3>Advanced Features</h3>
-                            <ul class="doc-list">
-                                <li><strong>OCR Support:</strong> Tesseract OCR for scanned PDF documents (supports
-                                    English and German)</li>
-                                <li><strong>Batch Processing:</strong> Process up to 50 PDF files simultaneously with
-                                    concurrency control (max 5 concurrent)</li>
-                                <li><strong>File Preview:</strong> PDF.js with zoom and page navigation controls</li>
-                                <li><strong>Data Export:</strong> Download results as CSV or JSON</li>
-                            </ul>
-                        </div>
-
-                        <div class="doc-section">
-                            <h3>Documentation Files</h3>
-                            <p>For comprehensive setup and usage information, refer to:</p>
-                            <ul class="doc-list">
-                                <li><strong>README.md</strong> - Complete project overview and quick start</li>
-                                <li><strong>SETUP_GUIDE.md</strong> - Step-by-step installation for all platforms</li>
-                                <li><strong>MONGODB_SETUP.md</strong> - Database configuration (local or cloud)</li>
-                                <li><strong>TESTING_GUIDE.md</strong> - Testing procedures and API examples</li>
-                                <li><strong>VALIDATION_RULES.md</strong> - Detailed validation rules documentation</li>
-                            </ul>
-                        </div>
-
-                        <div class="doc-section">
-                            <h3>Key Limitations</h3>
-                            <ul class="doc-list">
-                                <li>Line item extraction is basic (complex tables may be missed)</li>
-                                <li>Language support limited to English and German</li>
-                                <li>No user authentication (all data accessible)</li>
-                                <li>No built-in API rate limiting</li>
-                                <li>Extraction accuracy varies with invoice format and quality</li>
-                            </ul>
-                        </div>
-
-                        <div class="doc-section doc-footer">
-                            <p><strong>Need Help?</strong> Check the documentation files in the project root or visit
-                                <code>http://localhost:8000/docs</code> for interactive API documentation.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,24 @@
+AI Session Log - Invoice QC Service
+===================================
+
+Session Date: 2025-12-04
+AI Assistant: Google DeepMind Antigravity
+
+Key Interactions:
+-----------------
+1. Initial Scaffolding:
+   - Generated FastAPI backend structure (main.py, models.py).
+   - Created Vanilla JS frontend architecture (index.html, app.js).
+
+2. Extraction Logic:
+   - Suggested Hybrid approach: Google Doc AI -> Gemini Fallback -> Regex.
+   - Generated the Pydantic models for strict type checking.
+
+3. Debugging & Refinement:
+   - Issue: Dark mode CSS for <select> dropdowns resulted in white-on-white text.
+   - AI Proposal: Generic dark mode palette.
+   - Manual Correction: Added specific `!important` overrides for `option` and `select` elements to ensure readability on Windows/Chrome dark mode.
+
+4. Documentation:
+   - Summarized project structure for README.md.
+   - Generated Mermaid diagrams for architecture flow.
