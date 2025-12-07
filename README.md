@@ -145,7 +145,11 @@ graph LR
     GOOGLE_DOCUMENT_AI_LOCATION="us"
     GOOGLE_DOCUMENT_AI_PROCESSOR_ID="your-processor-id"
     GEMINI_API_KEY="your-gemini-api-key" (Optional if using Vertex AI credentials)
+    # Feature Flags
+    ENABLE_DOCUMENT_AI=false (Default: false. Set to true to enable Premium Document AI)
     ```
+
+    *Note: Google Document AI is treated as a premium feature requiring Google Cloud billing. It is disabled by default.*
 
 ---
 

@@ -122,15 +122,29 @@ class GoogleDocumentAIExtractor:
         self.processor_id = os.getenv("GOOGLE_DOCUMENT_AI_PROCESSOR_ID")
         self.location = os.getenv("GOOGLE_DOCUMENT_AI_LOCATION", "us")
         
-        # Try to initialize Document AI client if credentials available
+        # Check if Premium Feature is enabled
+        self.is_enabled = os.getenv("ENABLE_DOCUMENT_AI", "false").lower() == "true"
+        
+        # Try to initialize Document AI client if credentials available AND enabled
         self.document_ai_client = None
-        if DOCUMENT_AI_AVAILABLE:
+        if DOCUMENT_AI_AVAILABLE and self.is_enabled:
             try:
                 credentials = None
                 service_account_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+                
+                if service_account_path:
+                    # If not absolute and not in CWD, try relative to this file
+                    if not os.path.isabs(service_account_path) and not os.path.exists(service_account_path):
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        potential_path = os.path.join(script_dir, service_account_path)
+                        if os.path.exists(potential_path):
+                            service_account_path = potential_path
+                            logger.info(f"Resolved credentials path to: {service_account_path}")
+                
                 if service_account_path and os.path.exists(service_account_path):
                     from google.oauth2 import service_account
                     credentials = service_account.Credentials.from_service_account_file(service_account_path)
+                    logger.info("Loaded Google Cloud credentials successfully")
 
                 self.document_ai_client = documentai.DocumentProcessorServiceClient(
                     client_options=ClientOptions(
@@ -138,8 +152,25 @@ class GoogleDocumentAIExtractor:
                     ),
                     credentials=credentials
                 )
+                logger.info(f"Document AI Client initialized for {self.project_id}")
             except Exception as e:
-                logger.warning(f"Document AI client init failed: {str(e)}")
+                logger.error(f"Document AI client init failed: {str(e)}", exc_info=True)
+                self.document_ai_client = None
+        elif not self.is_enabled:
+            logger.info("Google Document AI is disabled (Premium Feature). Set ENABLE_DOCUMENT_AI=true to activate.")
+
+    def check_health(self) -> bool:
+        """Verify if Document AI API is accessible"""
+        if not self.document_ai_client:
+            return False
+        try:
+            # Simple list processors call to verify auth and billing
+            parent = f"projects/{self.project_id}/locations/{self.location}"
+            self.document_ai_client.list_processors(parent=parent)
+            return True
+        except Exception as e:
+            logger.warning(f"Document AI health check failed: {e}")
+            return False
 
     def extract_from_pdf(self, pdf_path: str) -> InvoiceData:
         """
@@ -214,7 +245,7 @@ class GoogleDocumentAIExtractor:
             return self._parse_document_ai_response(document)
             
         except Exception as e:
-            logger.error(f"Document AI processing failed: {str(e)}")
+            logger.error(f"Document AI processing failed: {str(e)}", exc_info=True)
             return None
 
     def _parse_document_ai_response(self, document) -> InvoiceData:

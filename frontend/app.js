@@ -1,5 +1,5 @@
-const API_BASE_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
-//const API_BASE_URL = "http://localhost:8000"
+//const API_BASE_URL = "https://invoice-qc-service-vishal-k-r.onrender.com";
+const API_BASE_URL = "http://localhost:8000"
 
 let currentInvoiceData = null;
 let currentPdfFile = null; // Store uploaded PDF file for preview
@@ -79,6 +79,47 @@ async function testBackendConnection() {
     }
 }
 
+async function initializeModelStatus() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/status`);
+        if (response.ok) {
+            const status = await response.json();
+            const select = document.getElementById('extraction-mode');
+            if (!select) return;
+
+            const statusMap = {
+                'google_document_ai': status.google_document_ai,
+                'gemini_extraction': status.gemini_extraction,
+                'pdf_extractor': status.pdf_extractor
+            };
+
+            Array.from(select.options).forEach(opt => {
+                const val = opt.value;
+                if (statusMap.hasOwnProperty(val)) {
+                    const isWorking = statusMap[val];
+
+                    // Special handling for Google Document AI (Premium)
+                    if (val === 'google_document_ai' && !isWorking) {
+                        if (!opt.text.includes('Premium')) {
+                            opt.text = `🔒 Google Document AI (Premium)`;
+                            opt.disabled = true;
+                            opt.title = "Available only in Premium — requires Google Cloud billing.";
+                        }
+                        return;
+                    }
+
+                    const symbol = isWorking ? '✅' : '❌';
+                    if (!opt.text.includes('✅') && !opt.text.includes('❌')) {
+                        opt.text = `${opt.text} ${symbol}`;
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.warn('Could not fetch model status:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     try {
         // Test backend connection first
@@ -96,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeThemeToggle();
         loadDashboardStats();
         loadInvoices();
+        initializeModelStatus(); // Check and display model status
 
         const getStartedBtn = document.getElementById('get-started-btn');
         if (getStartedBtn) {
@@ -618,6 +660,11 @@ function displayBatchResults(result, files) {
             resultItem.innerHTML = `
                 <div class="result-item-header">
                     <span class="result-filename">${item.filename || 'Unknown'}</span>
+                    ${item.extraction_metadata?.model_used ?
+                    `<span class="model-mini-badge" style="font-size:0.8em; margin-right:auto; margin-left:10px; padding:2px 6px; background:var(--bg-tertiary); border-radius:4px;">
+                            ${item.extraction_metadata.model_used.includes('Document AI') ? '🧾' : (item.extraction_metadata.model_used.includes('Gemini') ? '👁️‍🗨️' : '📄')} 
+                            ${item.extraction_metadata.model_used}
+                        </span>` : ''}
                     <span class="result-score score-${scoreClass}">Score: ${score}</span>
                 </div>
                 <div class="result-item-details">
@@ -776,7 +823,15 @@ function displayResults(data, filename, showPreview = true) {
             modelBadge.className = 'status-badge';
             modelBadge.style.marginLeft = '10px';
             modelBadge.style.background = '#4A90E2'; // Blue
-            modelBadge.textContent = `Model: ${data.extraction_metadata.model_used}`;
+
+            // Map model to icon
+            let icon = '🤖';
+            const modelName = data.extraction_metadata.model_used;
+            if (modelName.includes('Document AI')) icon = '🧾';
+            else if (modelName.includes('Gemini')) icon = '👁️‍🗨️';
+            else if (modelName.includes('PDF')) icon = '📄';
+
+            modelBadge.textContent = `${icon} ${modelName}`;
             modelBadge.title = `Confidence: ${data.extraction_metadata.confidence || 'N/A'}`;
             statusBadge.parentNode.appendChild(modelBadge);
         }

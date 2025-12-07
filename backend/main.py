@@ -248,6 +248,18 @@ def get_file_type(filename: str) -> str:
     else:
         return 'other'
 
+@app.get("/api/status")
+async def get_system_status():
+    """Check availability of extraction engines"""
+    doc_ai_status = document_ai_extractor.check_health()
+    gemini_status = enhanced_extractor.gemini_available
+    
+    return {
+        "google_document_ai": doc_ai_status,
+        "gemini_extraction": gemini_status,
+        "pdf_extractor": True # Local always available
+    }
+
 @app.post("/api/upload", response_model=ProcessResponse)
 async def upload_and_process(
     file: UploadFile = File(...),
@@ -322,6 +334,10 @@ async def upload_and_process(
             try:
                 # EXECUTE EXTRACTION BASED ON SELECTION
                 if selected_method == "google_document_ai":
+                    # Check if premium feature is enabled
+                    if not document_ai_extractor.is_enabled:
+                         raise HTTPException(status_code=400, detail="Google Document AI is a premium feature and is currently unavailable.")
+                    
                     try:
                         doc_ai_result = document_ai_extractor.extract_from_pdf(temp_file_path)
                         # Convert to InvoiceSchema
