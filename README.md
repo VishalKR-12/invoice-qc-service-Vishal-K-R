@@ -2,6 +2,9 @@
 
 A robust, full-stack solution for automated invoice data extraction and quality control. This system leverages a "Hybrid AI" approach, combining the structured precision of **Google Document AI**, the cognitive flexibility of **Google Gemini 2.5 Flash**, and traditional **Regex-based** parsing to ensure high-accuracy data capture.
 
+## Video Demo
+[Watch the Video Walkthrough](https://drive.google.com/file/d/1U9xi__rtYbZoFtm7eslP10wlDq-PTCSL/view?usp=sharing)
+
 ---
 
 ## 8. Deliverables
