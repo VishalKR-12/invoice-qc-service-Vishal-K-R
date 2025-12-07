@@ -78,6 +78,12 @@ body {
     color: var(--primary-color);
 }
 
+.logo-image {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
 .logo-text {
     font-size: 24px;
     font-weight: 700;
@@ -477,7 +483,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .batch-progress {
@@ -1281,12 +1289,12 @@ body {
     .results-layout {
         grid-template-columns: 1fr;
     }
-    
+
     .pdf-preview-header {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .preview-controls {
         width: 100%;
         justify-content: flex-start;
@@ -1309,32 +1317,32 @@ body {
     .data-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .preview-controls {
         flex-wrap: wrap;
         gap: 4px;
     }
-    
+
     .preview-control-btn {
         width: 28px;
         height: 28px;
     }
-    
+
     .zoom-level {
         font-size: 11px;
         min-width: 40px;
     }
-    
+
     .pdf-viewer-wrapper {
         min-height: 300px;
         max-height: 400px;
     }
-    
+
     .results-header-top {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .btn-back-to-batch {
         width: 100%;
         justify-content: center;
