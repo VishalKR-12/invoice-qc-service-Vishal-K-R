@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "invoiceextractionproject",
+  "private_key_id": "e9000f122b758a6bf3b1233861a35dedab8b6b8b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD0WN5Ya9x0yEYs\nLi6lrkL8ZooKgDZ9v84+uwPSLbSp9wLn+Q10J/QI5cbwd8ZzNCflBiDCqfaKzuX0\n0zHVK4bfMhN+FOr9yHdbncAP9LAvRCWll4U2cohiKyNKLueY/LTdLPxmDnR1M6Et\n/l9O0P77t6An0PGWeJclBboObrF8wLUxGx10hCrwvHH+UIKR6Q/8fTT1TvyQ/sCs\nhPrazCCn3x87jsxlc2o8lVoq6g6ivKfraPuhWRTnB3kbN2raZl+chCEzhVuzLYO5\nGpd9/D1AF281wZ/EL5FAm85jytfgPNOzHzkdtoyAfm+qyyTL3nyh1F1PzOyqb8zR\nK1haf46fAgMBAAECggEAIfhNkmm4a0Hr7jjOF7mQ1X857LjOGpBfuifiIZu6FLEN\nuzX23AcGmHVoFsadanxomXX5zaZhwK1/7xgCGGU7PxdlT1oqy0p4kYjuX9Qq6an7\nOTjF9n+uHJvBBboHTPpro0jISYtJPywE2fHrH819eChGAJMTVdHWYs7CLZR6YgyG\nTcFBvh1f7DkmoHW28N4TPhMxVQO4XDDM7dALU7o+yhH/ZgIyMTS5z2ARoZ/mGX+e\nSvhK86JPW8ghCzQg+XlTVSka07WOIicBMHOiDSxYUW4D2vPMyYLgth3crras66f4\n8u+JbZnt+pnRl52/7i61j5WwZb3AfkC676nuSfKh1QKBgQD8wTEiqX+6nxwZD3jj\nmpblDkjdG5v5FwtAbBzdVmBu0sLKojdwKIxk7+psfUHvMfSzLsBtHm06VaMIc/k/\nPaQ5R69ArYA1oIlML9f7su7Xzs7rU4rFCdqkiB8znsbp7pUod0Fxtdj+tIa51/a4\n3OSRM8vBMV/bx/70sSzaaLsDQwKBgQD3fAp+O0b0HcQQOlXFi9MYGw8gSC+koHRC\nMzOhUII7pCvGidVhfXyQXVszr9onPY7fZjDkYQwXT9nRLpB8bBcIXt5nBFNsUK03\nnMFiR1DhunCDXpQNKJrL8MXqksuV881/wqn4nn2i8tPKq0EddGgl8svP8RdlJgI8\n/PvbWSUbdQKBgQCw4eKpB0XELKVVRGatofoHwr9rPW8iGuZc50wr+c7yv7xiYrO5\nYiceXGgKFH6YDrXYz9cKhkiakmPN/ptnjpPnIiubb9BRt09eaf0UwFw12x0jwwtS\naVsB2eE8FtnNzJHGB+9czI5Xca73UBPxu2SZ2U22nf8fqA7c30EseC6oUQKBgECW\nzuZC8jGj0xepIdl8tIsGBNyX+lcsySq90iu3p0WJgyM9tcLLzUagFr1Wl8jF+BO1\nx+zSpyUuYdqGHI9cZmZ42/Jm3p7WL17kOlQ76JAA6HxgoqMMhdnT7NNbnGZ2Spud\nYl7QflmYpk2uhD/7sXK1+xs6ALEVSmBAZjrI+TZBAoGBAPggrIB2821V1TVo+8da\nhHwE0Hlgvrw6k0KA0rQrq8XGF7tDYvDbg8OaPI3i5djYzxG1eLilkgj24rPNSj2h\nKGodoasLYaFLJUy2j0GCwNsTQtItUbvvgLs7GR1dN6oyuPlsOZDB6cpF53ZW0MdU\nofg1ZZ+2/2OUUjFYbEkmuSjZ\n-----END PRIVATE KEY-----\n",
+  "client_email": "document-ai-sa@invoiceextractionproject.iam.gserviceaccount.com",
+  "client_id": "105508830574437409657",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/document-ai-sa%40invoiceextractionproject.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

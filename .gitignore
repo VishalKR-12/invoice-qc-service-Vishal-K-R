@@ -39,5 +39,4 @@ htmlcov/
 *.tmp
 *.temp
 
-
-backend/invoiceextractionproject-e9000f122b75.json
+backend\invoiceextractionproject-e9000f122b75.json
